@@ -1,9 +1,7 @@
 #include "Engine.h"
 #include <stdlib.h>
 #include <memory.h>
-#include "Object.h"
-#include "Player.h"
-
+#include "Scene.h"
 //
 //  You are free to modify this file
 //
@@ -18,12 +16,15 @@
 //  schedule_quit_game() - quit game after act()
 
 
-Player player(Triangle(vec2<float>(100, 50), vec2<float>(200, 60), vec2<float>(150, 150), Color(255,0,0)));
-Rectangle r;
+
+GameScene scene;
 // initialize game data in this function
 void initialize()
 {
+    scene.setPlayer(Triangle(vec2<float>(100, 50), vec2<float>(200, 60), vec2<float>(150, 150), Color(255, 0, 0)));
+    Rectangle r;
     r.set_by_lt_rb(vec2<float>(0, 0), vec2<float>(30, SCREEN_HEIGHT), Color(0, 255, 0));
+    scene.addRectangleObject(r);
 }
 
 // this function is called to update game data,
@@ -33,7 +34,7 @@ void act(float dt)
   if (is_key_pressed(VK_ESCAPE))
     schedule_quit_game();
 
-  player.act(dt);
+  scene.act(dt);
 }
 
 // fill buffer in this function
@@ -43,8 +44,7 @@ void draw()
   // clear backbuffer
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
 
-  r.draw(buffer);
-  player.draw(buffer);
+  scene.draw(buffer);
 }
 
 // free game data in this function

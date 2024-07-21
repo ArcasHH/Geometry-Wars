@@ -14,10 +14,13 @@ struct Player{
     Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{} {
 		moveTo(vec2<float>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)); //move player to screen center
 	}
+	bool collide(Triangle& t);
 
 private:
     void control(float dt);
     void moveBy(vec2<float> vec);
 	void moveTo(vec2<float> vec);
+	void rotate(float phi);
+	bool out_of_bounds();
 };
 

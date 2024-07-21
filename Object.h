@@ -61,6 +61,10 @@ struct vec2 final {
     vec2() = default;
     vec2(T a, T b) : x(a), y(b) {}
     vec2& operator=(const vec2&) = default;
+
+    float sq_length() {
+        return x * x + y * y;
+    }
 };
 
 
