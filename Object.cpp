@@ -51,3 +51,17 @@ vec2<float> Triangle::getCenter() const {
     p5 = (p1 + p3) * (0.5);
     return  p5 + ((p2 - p5) * (1 / 3)); ;
 }
+
+void Rectangle::set_by_lt_rb(vec2<float> lt, vec2<float> rb, Color c) {
+    center_pos = (lt + rb) * 0.5;
+    size = rb - lt;
+    color = c;
+    vec2<float> rt(rb.x, lt.y);
+    vec2<float> lb(lt.x, rb.y);
+    t1 = Triangle(lt, rb, rt, c);
+    t2 = Triangle(lt, rb, lb, c);
+}
+void Rectangle::draw(BuffTy buffer) {
+    t1.draw(buffer);
+    t2.draw(buffer);
+}

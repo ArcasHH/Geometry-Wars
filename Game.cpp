@@ -19,10 +19,11 @@
 
 
 Player player(Triangle(vec2<float>(100, 50), vec2<float>(200, 60), vec2<float>(150, 150), Color(255,0,0)));
+Rectangle r;
 // initialize game data in this function
 void initialize()
 {
-
+    r.set_by_lt_rb(vec2<float>(0, 0), vec2<float>(30, SCREEN_HEIGHT), Color(0, 255, 0));
 }
 
 // this function is called to update game data,
@@ -42,7 +43,7 @@ void draw()
   // clear backbuffer
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
 
-  //t.draw(buffer);
+  r.draw(buffer);
   player.draw(buffer);
 }
 

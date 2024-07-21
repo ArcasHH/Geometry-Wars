@@ -64,7 +64,7 @@ struct vec2 final {
 };
 
 
-struct Triangle {
+struct Triangle final {
     vec2<float> p1, p2, p3;
     Color color;
 
@@ -82,4 +82,24 @@ private:
     void draw_horizontal_segment(BuffTy buffer, float xpos1, float xpos2, int y) const;
     void draw_top(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
     void draw_bottom(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
+};
+
+struct Rectangle final{
+    vec2<float> size;
+    vec2<float> center_pos;
+    Color color;
+    Triangle t1, t2;
+
+    Rectangle() = default;
+    Rectangle(vec2<float> Center_Position, vec2<float> Size, Color c) : center_pos{ Center_Position }, size{ Size }, color{ c } {
+        vec2<float> lt = Center_Position - (Size * 0.5);
+        vec2<float> rb = Center_Position + (Size * 0.5);
+        vec2<float> rt(rb.x, lt.y);
+        vec2<float> lb(lt.x, rb.y);
+        t1 = Triangle(lt, rb, rt, c);
+        t2 = Triangle(lt, rb, lb, c);
+    }
+    void set_by_lt_rb(vec2<float> lt, vec2<float> rb, Color c);
+    void draw(BuffTy buffer);
+    
 };
