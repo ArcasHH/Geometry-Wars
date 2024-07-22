@@ -1,11 +1,15 @@
 #pragma once
+
+constexpr int BOUND_WIDTH = 30;
+
 constexpr  float  MAX_SPEED_X = 0.52f;//maximum possible player speed (speed limit)
 constexpr  float  MAX_SPEED_Y = 0.52f;
+constexpr  float  MAX_ENEMY_SPEED = 0.1f;
 //constexpr float SQ_MAX_SPEED = 1.f;
 
 constexpr  float  SPEED_SCALE_X = 0.001f;//the coefficient of speed change when control(). // must not exceed the value of MAX_SPEED
 constexpr  float  SPEED_SCALE_Y = 0.001f;
-constexpr  float  MAX_ENEMY_SPEED = 0.1f;
+
 
 //static_assert(SPEED_SCALE_X < MAX_SPEED_X * 1000.f);
 //static_assert(SPEED_SCALE_Y < MAX_SPEED_Y * 1000.f);

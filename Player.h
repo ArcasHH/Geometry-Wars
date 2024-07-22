@@ -29,6 +29,6 @@ private:
     void moveBy(vec2<float> vec);
 	void moveTo(vec2<float> vec);
 	void rotate();
-	bool out_of_bounds(int width);
+	bool out_of_bounds();
 };
 

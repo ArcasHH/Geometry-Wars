@@ -7,7 +7,7 @@ void  Player::act(float dt) {
 
     rotate();
     control(dt);
-    out_of_bounds(30);
+    out_of_bounds();
     moveBy(speed);
     is_control = true;
 }
@@ -56,32 +56,25 @@ void Player::moveTo(vec2<float> vec) {
 }
 
 
-bool Player::out_of_bounds(int bound_width) {
+bool Player::out_of_bounds() {
     vec2<float> center = sprite.getCenter();
-    if (center.x <= bound_width ) {
-        speed.x = SPEED_SCALE_X*2 ;
-        moveBy(vec2<float>(MAX_SPEED_X *10, 0));
+    if (center.x <= BOUND_WIDTH) {
+        speed.x = SPEED_SCALE_X * 3 ;
         is_control = false;
         return true;
     }
-    if (center.y <= bound_width ) {
-        speed.y = SPEED_SCALE_Y * 2;
-        moveBy(vec2<float>(0, MAX_SPEED_Y* 10));
-
+    if (center.y <= BOUND_WIDTH) {
+        speed.y = SPEED_SCALE_Y * 3;
         is_control = false;
         return true;
     }
-    if (center.x >= SCREEN_WIDTH - bound_width ) {
-        speed.x = -SPEED_SCALE_X * 2;
-        moveBy(vec2<float>( - MAX_SPEED_X* 10, 0));
-
+    if (center.x >= SCREEN_WIDTH - BOUND_WIDTH) {
+        speed.x = -SPEED_SCALE_X * 3;
         is_control = false;
         return true;
     }
-    if (center.y >= SCREEN_HEIGHT - bound_width ) {
-        speed.y = -SPEED_SCALE_Y * 2;
-        moveBy(vec2<float>(0,  - MAX_SPEED_Y* 10));
-
+    if (center.y >= SCREEN_HEIGHT - BOUND_WIDTH) {
+        speed.y = -SPEED_SCALE_Y * 3;
         is_control = false;
         return true;
     }
