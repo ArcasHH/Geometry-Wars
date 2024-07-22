@@ -11,6 +11,7 @@ struct Enemy : public IDrawable, IObject, IActable {
 	int damage;
 	int score{ 0 };
 	bool is_alive{true};
+	bool kill_player{ false };
 
 	void act(float dt, vec2<float> player_pos);
 	void draw(BuffTy buffer);
@@ -21,4 +22,5 @@ struct Enemy : public IDrawable, IObject, IActable {
 	void moveTo(vec2<float> vec);
 	void rotate(vec2<float> player_pos);
 	void navigate(vec2<float> player_pos);
+	bool out_of_bounds();
 };

@@ -7,7 +7,7 @@ struct Player: public IDrawable, IObject{
 	Triangle sprite;
 	vec2<float> position;
 	vec2<float> speed;
-	vec2<float> dir; //need for turnøòï towards the cursor
+	vec2<float> dir; //need for turning towards the cursor
 	bool is_control { true };
 
 	int health;
@@ -19,7 +19,7 @@ struct Player: public IDrawable, IObject{
 	void draw(BuffTy buffer);
 
     Player() = default;
-	Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ 100 }, damage{ 1 } {
+	Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ START_HEALTH }, damage{ START_DAMAGE } {
 		moveTo(vec2<float>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)); //move player to screen center
 	}
 	//bool collide(Triangle& t);

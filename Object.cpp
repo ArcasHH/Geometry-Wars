@@ -1,19 +1,9 @@
 #include "Object.h"
 
 
-float vec_mul(vec2<float> a, vec2<float> b) {
+float vector_product(vec2<float> a, vec2<float> b) { 
     return a.x * b.y - a.y * b.x;
-}
-bool point_in_triangle(vec2<int> vec, Triangle& t) {
-    vec2<float> v (static_cast<float>(vec.x), static_cast<float>(vec.y));
-    float a = vec_mul(t.p1 - v, t.p2 - t.p1);
-    float b = vec_mul(t.p2 - v, t.p3 - t.p2);
-    float c = vec_mul(t.p3 - v, t.p1 - t.p3);
-    if ((a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0))
-        return true;
-    return false;
-
-}
+} 
 float scalar_product(vec2<float> a, vec2<float> b) {
     return  b.x * a.x + b.y * a.y;
 }
@@ -31,7 +21,16 @@ float angle_between(vec2<float> a, vec2<float> b) {
     }
     else return 0.f;
 }
+bool point_in_triangle(vec2<int> vec, Triangle& t) {
+    vec2<float> v(static_cast<float>(vec.x), static_cast<float>(vec.y));
+    float a = vector_product(t.p1 - v, t.p2 - t.p1);
+    float b = vector_product(t.p2 - v, t.p3 - t.p2);
+    float c = vector_product(t.p3 - v, t.p1 - t.p3);
+    if ((a >= 0 && b >= 0 && c >= 0) || (a <= 0 && b <= 0 && c <= 0))
+        return true;
+    return false;
 
+}
 
 void Triangle::draw(BuffTy buffer) {
     int y_max = static_cast<int>(std::max(std::max(p1.y, p2.y), std::max(p3.y, p2.y)));
