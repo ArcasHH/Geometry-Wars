@@ -1,23 +1,6 @@
 #include "Player.h"
 
 
-float scalar_product(vec2<float> a, vec2<float> b) {
-    return  b.x * a.x + b.y * a.y;
-}
-float angle_between(vec2<float> a, vec2<float> b) {
-    if ((a.sq_length() * b.sq_length()) != 0) {
-        float dot = scalar_product(a, b) / (b.length() * a.length());
-        if (dot > 1) dot = 1.f;
-        else if (dot < -1) dot = -1.f;
-        if (a.x * b.y - a.y * b.x > 0) {       
-            return std::acos(dot);
-        }   
-        else {   
-            return -(std::acos(dot));
-        }
-    }
-    else return 0.f;
-}
 
 
 void  Player::act(float dt) {  
@@ -66,6 +49,7 @@ void Player::moveBy(vec2<float> vec) {
     sprite.p1 += vec;
     sprite.p2 += vec;
     sprite.p3 += vec;
+    position = sprite.getCenter();
 }
 void Player::moveTo(vec2<float> vec) {
     moveBy(vec - sprite.getCenter());

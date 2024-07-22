@@ -1,42 +1,25 @@
 #pragma once
-#include "Object.h"
 #include "Constants.h"
-class IDrawable {
-public:
-	virtual void draw(BuffTy) = 0;
-	virtual ~IDrawable() = default;
-};
-class IActable {
-protected:
-	Triangle start;
-public:
-	IActable(Triangle start) : start{ start } {}
-	virtual void act(float dt) = 0;
-	virtual ~IActable() = default;
-};
+#include "Interface.h"
 
-class IObject {
-protected:
-	Triangle sprite;
-public:
-	IObject() = default;
-	IObject(Triangle obj) : sprite{ obj } {}
-	const Triangle& getTriangle() const { return sprite; }
-	virtual ~IObject() = default;
-};
 
 struct Player: public IDrawable, IObject{
 	Triangle sprite;
 	vec2<float> position;
 	vec2<float> speed;
-	vec2<float> dir;
-	bool is_control{ true };
+	vec2<float> dir; //need for turnøòï towards the cursor
+	bool is_control { true };
+
+	int health;
+	bool is_alive { true };
+	bool can_shoot { true };
+	int damage;
 
 	void act(float dt);
 	void draw(BuffTy buffer);
 
     Player() = default;
-	Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0,1} {
+	Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ 100 }, damage{ 1 } {
 		moveTo(vec2<float>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)); //move player to screen center
 	}
 	//bool collide(Triangle& t);

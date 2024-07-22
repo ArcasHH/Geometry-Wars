@@ -1,16 +1,13 @@
 #pragma once
 #include "Object.h"
 #include "Player.h"
+#include "Enemy.h"
 #include <memory>
 
-
-
-
-
-
 struct GameScene {
+    vec2<float> player_pos;
     std::unique_ptr<Player> player;
-    std::vector<std::unique_ptr<Triangle>> Storage;
+    std::vector<std::unique_ptr<Enemy>> EnemyBuffer;
 
     GameScene() = default;
     GameScene(const GameScene&) = delete;
@@ -18,19 +15,10 @@ struct GameScene {
     GameScene& operator=(const GameScene&) = delete;
     GameScene& operator=(GameScene&& Other) = delete;
 
-    void setPlayer(Triangle tr) {
-        player = std::make_unique<Player>(tr);
-    }
-    void addTriangleObject(Triangle tr) {
-        Storage.emplace_back(std::make_unique<Triangle>(tr));
-    }
+    void setPlayer(Triangle tr);
+    void addEnemy(Triangle tr, vec2<float> position);
     
-    void act(float dt) {
-        player->act(dt);
-        
-    }
-    void draw(BuffTy buffer) {
-        player->draw(buffer);
-    }
+    void act(float dt);
+    void draw(BuffTy buffer);
 
 };

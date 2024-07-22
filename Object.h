@@ -118,6 +118,8 @@ struct Rectangle final{
 
 */
 
+
+
 struct Matrix {
     float data[2][2];
     Matrix() = default;
@@ -157,3 +159,5 @@ struct Matrix {
     }
     
 };
+float scalar_product(vec2<float> a, vec2<float> b);
+float angle_between(vec2<float> a, vec2<float> b);

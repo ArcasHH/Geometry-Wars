@@ -22,9 +22,7 @@ GameScene scene;
 void initialize()
 {
     scene.setPlayer(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0),  Color(255, 0, 0)));
-    //Rectangle r;
-    //r.set_by_lt_rb(vec2<float>(0, 0), vec2<float>(30, SCREEN_HEIGHT), Color(0, 255, 0));
-    //scene.addRectangleObject(r);
+    scene.addEnemy(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(0, 255, 0)), vec2<float>(100,100));
 }
 
 // this function is called to update game data,
