@@ -7,7 +7,7 @@
 struct GameScene {
     vec2<float> player_pos;
     std::unique_ptr<Player> player;
-    std::vector<std::unique_ptr<Enemy>> EnemyBuffer;
+
 
     GameScene() = default;
     GameScene(const GameScene&) = delete;
@@ -20,5 +20,8 @@ struct GameScene {
     
     void act(float dt);
     void draw(BuffTy buffer);
+
+private:
+    std::vector<std::unique_ptr<Enemy>> EnemyBuffer;
 
 };

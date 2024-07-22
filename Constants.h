@@ -4,6 +4,7 @@ constexpr int BOUND_WIDTH = 30;
 
 constexpr int START_HEALTH = 10;
 constexpr int START_DAMAGE = 1;
+constexpr float BULLET_SPEED = 1.f;
 constexpr float PUSHING_ENEMIES = 2.f;
 
 

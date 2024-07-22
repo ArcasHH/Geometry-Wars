@@ -1,14 +1,14 @@
 #pragma once
 #include "Interface.h"
 
-struct Bullet: public IDrawable, IActable{
+struct Bullet: public IDrawable{
 	vec2<float> speed;
 	vec2<float> position;
 	int damage;
 	bool is_hit{ false };
 
 	void draw(BuffTy buffer);
-	void act(float dt, vec2<float> player_pos);
+	void act(float dt);
 	void MoveBy(vec2<float> vec);
 
 	Bullet() = default;

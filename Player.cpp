@@ -4,15 +4,21 @@
 
 
 void  Player::act(float dt) {  
-
+    can_shoot = true;
     rotate();
     control(dt);
     out_of_bounds();
     moveBy(speed);
     is_control = true;
+    for (auto&& bullet : bullets) {
+        bullet.act(dt);
+    }
 }
 void Player::draw(BuffTy buffer) {
     sprite.draw(buffer);
+    for (auto&& bullet : bullets) {
+        bullet.draw(buffer);
+    }
 }
 void Player::control(float dt) {
     //float scale_x = SPEED_SCALE_X * dt;
@@ -41,6 +47,10 @@ void Player::control(float dt) {
         }
         if (!is_key_pressed('W') && !is_key_pressed('S')) { // speed fading
             speed.y *= SPEED_FADE;
+        }
+        if (is_mouse_button_pressed(0) && can_shoot) { // speed fading
+            shoot();
+            can_shoot = false;//need to add timer
         }
     }
 
@@ -93,5 +103,15 @@ void Player::rotate() {
         sprite.p3 = m * (sprite.p3 - p0) + p0;  
     }
     
+}
+
+void Player::shoot() {
+     vec2<float> bullet_speed = dir;
+     bullet_speed.normalize();
+     bullet_speed *= BULLET_SPEED;
+     Bullet bullet(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(255, 255, 255)), position, bullet_speed);
+     bullets.push_back(bullet);
+     can_shoot = false;
+
 }
 

@@ -5,9 +5,9 @@ void GameScene::act(float dt) {
     for (auto&& obj : EnemyBuffer) {
         if (auto* ActObj = dynamic_cast<IActable*>(obj.get())) {
             ActObj->act(dt, player_pos);
-            if (obj.get()->kill_player) {
-                player.get()->health -= obj.get()->damage;
-                player.get()->sprite.color = Color(255, 0, 0);
+            if (obj->kill_player) {
+                player->health -= obj->damage;
+                player->sprite.color = Color(255, 0, 0);
             }
         }
     }
@@ -32,8 +32,14 @@ void GameScene::draw(BuffTy buffer) {
 void GameScene::setPlayer(Triangle tr) {
     player = std::make_unique<Player>(tr);
     player_pos = player.get()->position;
+
+
+    //player = make_unique<Actor>(tr, myController);
+
 }
 void GameScene::addEnemy(Triangle tr, vec2<float> pos) {
-    EnemyBuffer.emplace_back(std::make_unique<Enemy>(tr));
-    EnemyBuffer[EnemyBuffer.size() - 1].get()->moveTo(pos);
+    auto &&Emplaced = EnemyBuffer.emplace_back(std::make_unique<Enemy>(tr));
+    Emplaced->moveTo(pos);
+
+    //make_unique<Actor>(tr, pos, AIController);
 }

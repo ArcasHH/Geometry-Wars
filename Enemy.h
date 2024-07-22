@@ -13,8 +13,8 @@ struct Enemy : public IDrawable, IObject, IActable {
 	bool is_alive{true};
 	bool kill_player{ false };
 
-	void act(float dt, vec2<float> player_pos);
-	void draw(BuffTy buffer);
+	void act(float dt, vec2<float> player_pos) override;
+	void draw(BuffTy buffer) const override;
 
 	Enemy() = default;
 	Enemy(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ 1 }, damage{ 1 } {}

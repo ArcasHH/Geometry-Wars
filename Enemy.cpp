@@ -15,7 +15,7 @@ void Enemy::act(float dt, vec2<float> player_pos) {
     moveBy(speed);
 }
 
-void Enemy::draw(BuffTy buffer) {
+void Enemy::draw(BuffTy buffer) const{
 	sprite.draw(buffer);
 }
 

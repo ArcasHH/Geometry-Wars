@@ -85,15 +85,9 @@ struct Triangle final {
         p1{ pos1 }, p2{ pos2 }, p3{ pos3 }, color{ c } {}
 
     Triangle& operator=(const Triangle& Other) = default;
-    void draw(BuffTy buffer);
+    void draw(BuffTy buffer) const;
 
     vec2<float> getCenter() const;
-
-private:
-    void reorganize();  // sort points by y coord
-    void draw_horizontal_segment(BuffTy buffer, float xpos1, float xpos2, int y) const;
-    void draw_top(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
-    void draw_bottom(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
 };
 /*
 struct Rectangle final{

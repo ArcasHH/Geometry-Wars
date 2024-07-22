@@ -5,7 +5,7 @@ class IDrawable {
 protected:
 	Triangle sprite;
 public:
-	virtual void draw(BuffTy buffer) {
+	virtual void draw(BuffTy buffer) const {
 		sprite.draw(buffer);
 	}
 	virtual ~IDrawable() = default;

@@ -1,10 +1,12 @@
 #pragma once
 #include "Constants.h"
 #include "Interface.h"
+#include "Bullet.h"
 
 
 struct Player: public IDrawable, IObject{
 	Triangle sprite;
+	std::vector<Bullet> bullets;
 	vec2<float> position;
 	vec2<float> speed;
 	vec2<float> dir; //need for turning towards the cursor
@@ -30,5 +32,6 @@ private:
 	void moveTo(vec2<float> vec);
 	void rotate();
 	bool out_of_bounds();
+	void shoot();
 };
 
