@@ -21,10 +21,10 @@ GameScene scene;
 // initialize game data in this function
 void initialize()
 {
-    scene.setPlayer(Triangle(vec2<float>(100, 50), vec2<float>(200, 60), vec2<float>(150, 150), Color(255, 0, 0)));
+    scene.setPlayer(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0),  Color(255, 0, 0)));
     Rectangle r;
     r.set_by_lt_rb(vec2<float>(0, 0), vec2<float>(30, SCREEN_HEIGHT), Color(0, 255, 0));
-    scene.addRectangleObject(r);
+    //scene.addRectangleObject(r);
 }
 
 // this function is called to update game data,
@@ -35,6 +35,7 @@ void act(float dt)
     schedule_quit_game();
 
   scene.act(dt);
+
 }
 
 // fill buffer in this function
@@ -45,6 +46,7 @@ void draw()
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
 
   scene.draw(buffer);
+
 }
 
 // free game data in this function

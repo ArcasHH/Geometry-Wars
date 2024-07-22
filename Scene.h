@@ -24,7 +24,9 @@ struct GameScene {
     }
     
     void act(float dt) {
+
         player->act(dt);
+        
     }
     void draw(BuffTy buffer) {
         for (auto&& obj : Storage) {
