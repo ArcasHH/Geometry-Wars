@@ -16,18 +16,9 @@ float angle_between(vec2<float> a, vec2<float> b) {
             return -(std::acos(dot));
         }
     }
-
     else return 0.f;
 }
-float point_segment(vec2<float> c, vec2<float> a, vec2<float> b) {
-    return (c.x * (a.y - b.y) + c.y * (b.x - a.x) + a.x * b.y - a.y * b.x);
-}
-bool segment_intersect(vec2<float> a, vec2<float> b, vec2<float> c, vec2<float> d) { // ab intersect cd?
-    if ((point_segment(c, a, b) * point_segment(d, a, b) <= 0) &&
-        (point_segment(a, c, d) * point_segment(b, c, d) <= 0))
-        return true;
-    return false;
-}
+
 
 void  Player::act(float dt) {  
 
@@ -80,16 +71,6 @@ void Player::moveTo(vec2<float> vec) {
     moveBy(vec - sprite.getCenter());
 }
 
-bool Player::collide(Triangle& t) {
-    if (segment_intersect(sprite.p1, sprite.p2, t.p1, t.p2) || segment_intersect(sprite.p1, sprite.p2, t.p2, t.p3) || segment_intersect(sprite.p1, sprite.p2, t.p1, t.p3) ||
-        segment_intersect(sprite.p2, sprite.p3, t.p1, t.p2) || segment_intersect(sprite.p2, sprite.p3, t.p2, t.p3) || segment_intersect(sprite.p2, sprite.p3, t.p1, t.p3) ||
-        segment_intersect(sprite.p1, sprite.p3, t.p1, t.p2) || segment_intersect(sprite.p1, sprite.p3, t.p2, t.p3) || segment_intersect(sprite.p1, sprite.p3, t.p1, t.p3)) {
-        speed = vec2 < float>(0, 0);
-        return true;
-    }
-        
-    return false;
-}
 
 bool Player::out_of_bounds(int bound_width) {
     vec2<float> center = sprite.getCenter();

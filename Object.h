@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 
+
 using BuffTy = decltype(buffer);
 union Color final {
     struct {
@@ -94,7 +95,7 @@ private:
     void draw_top(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
     void draw_bottom(BuffTy buffer, vec2<float>& p1, vec2<float>& p2, vec2<float>& p3) const;
 };
-
+/*
 struct Rectangle final{
     vec2<float> size;
     vec2<float> center_pos;
@@ -112,8 +113,10 @@ struct Rectangle final{
     }
     void set_by_lt_rb(vec2<float> lt, vec2<float> rb, Color c);
     void draw(BuffTy buffer);
-    
+
 };
+
+*/
 
 struct Matrix {
     float data[2][2];
