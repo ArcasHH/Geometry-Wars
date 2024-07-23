@@ -53,3 +53,9 @@ vec2<int> get_min_max(float a, float b, float c) {
     else if (c < min) min = c;
     return vec2<int>(static_cast<int>(min), static_cast<int>(max));
 }
+
+float random(float a, float b) {
+    int ia = static_cast<int>(a);
+    int ib = static_cast<int>(b);
+    return static_cast<float>(ia + std::rand() % (std::abs(ia) + ib));
+}

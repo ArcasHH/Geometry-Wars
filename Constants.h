@@ -1,14 +1,15 @@
 #pragma once
 
-constexpr int BOUND_WIDTH = 30;
+constexpr int BOUND_WIDTH = 32;
 
 constexpr int START_HEALTH = 10;
 constexpr int START_DAMAGE = 1;
-constexpr float BULLET_SPEED = 1.f;
+constexpr float BULLET_SPEED = 1.5f;
 constexpr int AMMO_AMOUNT = 16;
-constexpr float AMMO_RELOAD = 0.1f;
+constexpr float AMMO_RELOAD = 0.2f;
+constexpr float SHOCK_TIME = 0.5f;
 constexpr float PUSHING_ENEMIES = 2.f;
-
+constexpr float TIME_TO_ACT = 1.f; // time before enemies start act
 
 constexpr  float  MAX_SPEED = 0.52f;//maximum possible player speed (speed limit)
 constexpr  float  MAX_ENEMY_SPEED = 0.1f;

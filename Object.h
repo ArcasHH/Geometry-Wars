@@ -162,3 +162,5 @@ struct Matrix {
 
 float angle_between(const vec2<float>& a, const vec2<float>& b);
 vec2<int> get_min_max(float a, float b, float c);
+
+float random(float a, float b);

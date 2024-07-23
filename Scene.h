@@ -5,9 +5,8 @@
 #include <memory>
 
 struct GameScene {
-    vec2<float> player_pos;
     std::unique_ptr<Player> player;
-    
+    bool add_enemies{ false };
 
     GameScene() = default;
     GameScene(const GameScene&) = delete;
@@ -23,5 +22,8 @@ struct GameScene {
 
 private:
     std::vector<std::unique_ptr<Enemy>> EnemyBuffer;
-
+    void enemy_act(Enemy* enemy, float dt);
+    void enemy_player_collision(Enemy* enemy);
+    void bullet_enemy_collision(Bullet bullet, Enemy* enemy);
+    void addEnemies(int num);
 };

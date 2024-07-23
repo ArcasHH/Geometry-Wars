@@ -2,16 +2,21 @@
 #include<iostream>
 
 void  Player::act(float dt)  {
-    //can_shoot = true;
+    if(shock_time>0)
+        shock_time -= dt;
     if (get_cursor_x() > 0 && get_cursor_y() > 0 && get_cursor_x() < SCREEN_WIDTH && get_cursor_y() < SCREEN_HEIGHT)
         turnSide(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));
     control(dt);
+    ammoReload(dt);
     out_of_bounds();
     moveBy(speed);
     is_control = true;
     for (auto&& bullet : ammo) {
         bullet.act(dt);
     }
+    if (health <= 0)
+        schedule_quit_game(); ///die_screen
+
 }
 void Player::draw(BuffTy buffer) const{
     sprite.draw(buffer);
@@ -47,17 +52,11 @@ void Player::control(float dt) {
         if (!is_key_pressed('W') && !is_key_pressed('S')) { // speed fading
             speed.y *= SPEED_FADE;
         }
-        if (is_mouse_button_pressed(0) && can_shoot) { // speed fading
-            shoot();
-            ammo_reload = 0.f;
-            can_shoot = false;//need to add timer
+        if (is_mouse_button_pressed(0) && can_shoot) { 
+            shoot();       
         }
     }
-    ammo_reload += dt;
-    if (ammo_reload >= AMMO_RELOAD && !can_shoot) {
-        ammo_reload = 0.f;
-        can_shoot = true;
-    }
+    
     
         
 }
@@ -67,13 +66,20 @@ void Player::shoot() {
         if (!ammo[i].is_alive) {
             ammo[i].is_alive = true;
             ammo[i].moveTo(position);
-            ammo[i].set_dir(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));
-            
+            ammo[i].set_dir(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));        
             break;
         }
      }
+    ammo_reload = 0.f;
+    can_shoot = false;
 
 }
-
+void Player::ammoReload(float dt) {
+    ammo_reload += dt;
+    if (ammo_reload >= AMMO_RELOAD && !can_shoot) {
+        ammo_reload = 0.f;
+        can_shoot = true;
+    }
+}
 
 

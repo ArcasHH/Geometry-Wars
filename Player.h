@@ -8,8 +8,11 @@ struct Player: Actor{
 
 	bool is_control { true };
 	bool can_shoot { true };
-	float ammo_reload{ 0 };
 
+	float ammo_reload{ 0 };
+	float shock_time{ 0 };
+
+	int score{ 0 };
 	void act(float dt) override;
 	void draw(BuffTy buffer)const override;
 
@@ -27,5 +30,6 @@ struct Player: Actor{
 private:
     void control(float dt);
 	void shoot();
+	void ammoReload(float dt);
 };
 
