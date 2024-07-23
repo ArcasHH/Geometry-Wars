@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <iostream>
 #include <tuple>
+#include <functional>
+#include <optional>
 
 #include "Scene.h"
 //
@@ -25,7 +27,10 @@ namespace cmp {
         float x;
         float y;
     };
-    // TODO
+    struct Velocity {
+        float dx;
+        float dy;
+    };
 };
 
 template <typename ...Components>
@@ -75,7 +80,7 @@ struct Registry {
         auto& CmpMap = getMap<T>();
         auto [_, IsInserted] = CmpMap.emplace(Id, It);
         if (!IsInserted)
-            std::cerr << "Component for entity " << Id << " has been already recorded\n";
+            throw std::runtime_error{ "Component for entiry has been already recorded\n" };
     }
 
     template<typename T>
@@ -83,9 +88,19 @@ struct Registry {
         return getCmp<T>();
     }
 
+    template<typename T>
+    auto findComponentOrNone(EntityId Ent) -> std::optional<std::reference_wrapper<T>> {
+        auto& CmpMap = getMap<T>();
+        auto FindIt = CmpMap.find(Ent);
+        if (FindIt == CmpMap.end())
+            return std::nullopt;
+
+        return FindIt->second->second;
+    }
+
 };
 
-Registry<Triangle> Reg;
+Registry<Triangle, cmp::Position, cmp::Velocity> Reg;
 
 namespace sys {
 
@@ -98,6 +113,26 @@ namespace sys {
         }
     }
 
+    void move() {
+
+        auto& TView = Reg.view<Triangle>();
+
+
+        for (auto&& [Ent, Cmp] : TView) {
+           
+            auto FindIt = Reg.findComponentOrNone<cmp::Velocity>(Ent);
+            if (!FindIt)
+                continue;
+            vec2<float> d ( FindIt->get().dx, FindIt->get().dy);
+
+            Cmp.p1 += d;
+            Cmp.p2 += d;
+            Cmp.p3 += d;
+
+        }
+
+
+    }
 
 };
 
@@ -115,9 +150,14 @@ void initialize()
 
     auto FirstTriangle = Reg.create();
 
+    auto Sect = Reg.create();
+
     Reg.emplace<Triangle>(FirstTriangle, vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 200, 0));
 
-    Reg.emplace<Triangle>(FirstTriangle, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
+    Reg.emplace<Triangle>(Sect, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
+
+    Reg.emplace<cmp::Velocity>(Sect, 0.1f, 0.1f);
+
 }
 
 // this function is called to update game data,
@@ -129,6 +169,7 @@ void act(float dt)
 
   scene.act(dt);
 
+  sys::move();
 
 }
 
