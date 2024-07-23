@@ -1,6 +1,7 @@
 #include "Actor.h"
 void Actor::draw(BuffTy buffer) const {
-    sprite.draw(buffer);
+    if(is_alive)
+        sprite.draw(buffer);
 }
 
 void Actor::moveBy(vec2<float> vec) {

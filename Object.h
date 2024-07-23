@@ -70,6 +70,11 @@ struct vec2 final {
         x *= scale;
         y *= scale;
     }
+    vec2 normalized () {
+        vec2<T> vec = *this;
+        vec.normalize();
+        return vec;
+    }
 
     float dot(vec2<T> a) const {return  x * a.x + y * a.y;}
     float cross(vec2<T> a) const { return x * a.y - y * a.x; }

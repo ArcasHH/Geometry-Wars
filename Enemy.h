@@ -11,5 +11,7 @@ struct Enemy : Actor {
 
 	Enemy(Triangle tr, vec2<float> pos) : Actor(tr, pos) {}
 
+	bool is_collide(vec2<float> obj_pos, float sq_distance);
+private:
 	void navigate(vec2<float> player_pos);
 };

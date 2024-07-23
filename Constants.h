@@ -5,11 +5,12 @@ constexpr int BOUND_WIDTH = 30;
 constexpr int START_HEALTH = 10;
 constexpr int START_DAMAGE = 1;
 constexpr float BULLET_SPEED = 1.f;
+constexpr int AMMO_AMOUNT = 16;
+constexpr float AMMO_RELOAD = 0.1f;
 constexpr float PUSHING_ENEMIES = 2.f;
 
 
-constexpr  float  MAX_SPEED_X = 0.52f;//maximum possible player speed (speed limit)
-constexpr  float  MAX_SPEED_Y = 0.52f;
+constexpr  float  MAX_SPEED = 0.52f;//maximum possible player speed (speed limit)
 constexpr  float  MAX_ENEMY_SPEED = 0.1f;
 //constexpr float SQ_MAX_SPEED = 1.f;
 

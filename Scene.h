@@ -7,7 +7,7 @@
 struct GameScene {
     vec2<float> player_pos;
     std::unique_ptr<Player> player;
-
+    
 
     GameScene() = default;
     GameScene(const GameScene&) = delete;

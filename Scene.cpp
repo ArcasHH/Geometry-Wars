@@ -4,10 +4,18 @@ void GameScene::act(float dt) {
     
     for (auto&& obj : EnemyBuffer) {
         if (auto* ActObj = dynamic_cast<IActable*>(obj.get())) {
-            obj->player_pos = player->position; // enemy always know where player located
-            ActObj->act(dt);
-            if (obj->kill_player) {
-                player->health -= obj->damage;
+            if (obj->is_alive) {
+                obj->player_pos = player->position; // enemy always know where player located
+                ActObj->act(dt);
+                if (obj->kill_player) {
+                    player->health -= obj->damage;
+                }
+                for (int i = 0; i < AMMO_AMOUNT; ++i) {
+                    if (player->ammo[i].is_alive && obj->is_collide(player->ammo[i].position, 100)) {
+                        player->ammo[i].is_alive = false;
+                        obj->is_alive = false;
+                    }
+                }
             }
         }
     }

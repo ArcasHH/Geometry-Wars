@@ -4,10 +4,11 @@
 
 
 struct Player: Actor{
-	std::vector<Bullet> bullets;
+	Bullet ammo[AMMO_AMOUNT];
 
 	bool is_control { true };
 	bool can_shoot { true };
+	float ammo_reload{ 0 };
 
 	void act(float dt) override;
 	void draw(BuffTy buffer)const override;
@@ -16,6 +17,11 @@ struct Player: Actor{
 	Player(Triangle tr, vec2<float> pos) : Actor(tr, pos) {
 		health = START_HEALTH;
 		damage = START_DAMAGE;
+
+		Bullet bullet(Triangle(vec2<float>(5, 20), vec2<float>(0, 0), vec2<float>(10, 0), Color(255, 255, 255)), position, dir);
+		for (int i = 0; i < AMMO_AMOUNT; ++i) {
+			ammo[i] = bullet;
+		}
 	}
 
 private:

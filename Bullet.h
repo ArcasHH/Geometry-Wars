@@ -1,18 +1,19 @@
 #pragma once
-#include "Interface.h"
+#include "Actor.h"
 
-struct Bullet: public IDrawable{
+struct Bullet:Actor{
 	
-	vec2<float> speed;
-	vec2<float> position;
-	int damage;
 	bool is_hit{ false };
 
+	void act(float dt) override;
 	void draw(BuffTy buffer)const override;
-	void act(float dt);
-	void MoveBy(vec2<float> vec);
 
 	Bullet() = default;
-	Bullet(Triangle tr, vec2<float> pos, vec2<float> start_speed) : speed{ start_speed }, position{ pos }, damage{ 1 } {}
+	Bullet(Triangle tr, vec2<float> pos, vec2<float> direction) : Actor(tr, pos) {
+		is_alive = false;
+		dir = direction;
+		speed = dir.normalized() * BULLET_SPEED;
+	}
+	void set_dir(vec2<float> direction);
 };
 

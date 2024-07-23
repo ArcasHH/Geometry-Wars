@@ -1,21 +1,21 @@
 #include "Player.h"
-
+#include<iostream>
 
 void  Player::act(float dt)  {
-    can_shoot = true;
+    //can_shoot = true;
     if (get_cursor_x() > 0 && get_cursor_y() > 0 && get_cursor_x() < SCREEN_WIDTH && get_cursor_y() < SCREEN_HEIGHT)
-        turnSide(vec2<float>(get_cursor_x(), get_cursor_y()));
+        turnSide(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));
     control(dt);
     out_of_bounds();
     moveBy(speed);
     is_control = true;
-    for (auto&& bullet : bullets) {
+    for (auto&& bullet : ammo) {
         bullet.act(dt);
     }
 }
 void Player::draw(BuffTy buffer) const{
     sprite.draw(buffer);
-    for (auto&& bullet : bullets) {
+    for (auto&& bullet : ammo) {
         bullet.draw(buffer);
     }
 }
@@ -26,19 +26,19 @@ void Player::control(float dt) {
     float scale_y = SPEED_SCALE;
     if (is_control) {
         if (is_key_pressed('D')) {
-            if (speed.x <= MAX_SPEED_X)
+            if (speed.x <= MAX_SPEED)
                 speed.x += scale_x;
         }
         if (is_key_pressed('A')) {
-            if (speed.x >= -MAX_SPEED_X)
+            if (speed.x >= -MAX_SPEED)
                 speed.x -= scale_x;
         }
         if (is_key_pressed('S')) {
-            if (speed.y <= MAX_SPEED_Y)
+            if (speed.y <= MAX_SPEED)
                 speed.y += scale_y;
         }
         if (is_key_pressed('W')) {
-            if (speed.y >= -MAX_SPEED_Y)
+            if (speed.y >= -MAX_SPEED)
                 speed.y -= scale_y;
         }
         if (!is_key_pressed('A') && !is_key_pressed('D') ) { // speed fading
@@ -49,19 +49,31 @@ void Player::control(float dt) {
         }
         if (is_mouse_button_pressed(0) && can_shoot) { // speed fading
             shoot();
+            ammo_reload = 0.f;
             can_shoot = false;//need to add timer
         }
     }
-
+    ammo_reload += dt;
+    if (ammo_reload >= AMMO_RELOAD && !can_shoot) {
+        ammo_reload = 0.f;
+        can_shoot = true;
+    }
+    
+        
 }
 
 void Player::shoot() {
-     vec2<float> bullet_speed = dir;
-     bullet_speed.normalize();
-     bullet_speed *= BULLET_SPEED;
-     Bullet bullet(Triangle(vec2<float>(2.5, 5), vec2<float>(0, 0), vec2<float>(5, 0), Color(255, 255, 255)), position, bullet_speed);
-     bullets.push_back(bullet);
-     can_shoot = false;
+    for (int i = 0; i < AMMO_AMOUNT; ++i) {
+        if (!ammo[i].is_alive) {
+            ammo[i].is_alive = true;
+            ammo[i].moveTo(position);
+            ammo[i].set_dir(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));
+            
+            break;
+        }
+     }
 
 }
+
+
 
