@@ -33,7 +33,7 @@ struct Registry {
     using EntityId = uint64_t;
 
     template <typename T>
-    using ComponentStorage = std::vector<T>;
+    using ComponentStorage = std::vector<std::pair<EntityId, T>>;
 
     template <typename T>
     using ComponentMap = std::unordered_map< EntityId, typename ComponentStorage<T>::iterator>; // this std::any is a pointer to specific iterator;
@@ -68,7 +68,8 @@ struct Registry {
     void emplace(EntityId Id, Args && ... args) {
         auto& CmpStorage = getCmp<T>();
 
-        CmpStorage.emplace_back(std::forward<Args>(args)...);
+        CmpStorage.emplace_back(std::pair{ Id, T{ std::forward<Args>(args)... } });
+
         auto It = std::prev(CmpStorage.end());
 
         auto& CmpMap = getMap<T>();
@@ -92,7 +93,7 @@ namespace sys {
 
         auto& View = Reg.view<Triangle>();
 
-        for (auto&& Cmp : View) {
+        for (auto&& [Ent, Cmp] : View) {
             Cmp.draw(Buffer);
         }
     }
