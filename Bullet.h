@@ -2,12 +2,13 @@
 #include "Interface.h"
 
 struct Bullet: public IDrawable{
+	
 	vec2<float> speed;
 	vec2<float> position;
 	int damage;
 	bool is_hit{ false };
 
-	void draw(BuffTy buffer);
+	void draw(BuffTy buffer)const override;
 	void act(float dt);
 	void MoveBy(vec2<float> vec);
 

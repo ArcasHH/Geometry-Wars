@@ -12,34 +12,33 @@ void GameScene::act(float dt) {
         }
     }
     player->act(dt);
-    player_pos = player.get()->position;
-    if (player.get()->health <= 0) {
+    player_pos = player->position;
+    if (player->health <= 0) {
         schedule_quit_game();
     }
     
 }
-void GameScene::draw(BuffTy buffer) {
+void GameScene::draw(BuffTy buffer) const{
     for (auto&& obj : EnemyBuffer) {
         if (auto* DrObj = dynamic_cast<IDrawable*>(obj.get())) {
             DrObj->draw(buffer);
         }
     }
     player->draw(buffer);
-    player.get()->sprite.color = Color(255, 255, 255);
+    player->sprite.color = Color(255, 255, 255);
     
 }
 
-void GameScene::setPlayer(Triangle tr) {
-    player = std::make_unique<Player>(tr);
-    player_pos = player.get()->position;
+void GameScene::setPlayer(Triangle tr, vec2<float> pos) {
+    player = std::make_unique<Player>(tr, pos);
+    player_pos = player->position;
 
 
     //player = make_unique<Actor>(tr, myController);
 
 }
 void GameScene::addEnemy(Triangle tr, vec2<float> pos) {
-    auto &&Emplaced = EnemyBuffer.emplace_back(std::make_unique<Enemy>(tr));
-    Emplaced->moveTo(pos);
+    EnemyBuffer.emplace_back(std::make_unique<Enemy>(tr, pos));
 
     //make_unique<Actor>(tr, pos, AIController);
 }

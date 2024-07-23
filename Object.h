@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include <vector>
 #include <cmath>
-
+#include "Constants.h"
 
 using BuffTy = decltype(buffer);
 union Color final {
@@ -63,16 +63,16 @@ struct vec2 final {
     vec2(T a, T b) : x(a), y(b) {}
     vec2& operator=(const vec2&) = default;
 
-    float sq_length() const {
-        return x * x + y * y;
-    }
-    float length() const {
-        return std::sqrt(sq_length());
-    }
+    float sq_length() const {return x * x + y * y;}
+    float length() const {return std::sqrt(sq_length());}
     void normalize() {
-        x = x / length();
-        y = y / length();
+        float scale = 1 / length();
+        x *= scale;
+        y *= scale;
     }
+
+    float dot(vec2<T> a) const {return  x * a.x + y * a.y;}
+    float cross(vec2<T> a) const { return x * a.y - y * a.x; }
 };
 
 
@@ -85,9 +85,10 @@ struct Triangle final {
         p1{ pos1 }, p2{ pos2 }, p3{ pos3 }, color{ c } {}
 
     Triangle& operator=(const Triangle& Other) = default;
-    void draw(BuffTy buffer) const;
+    void draw(BuffTy buffer) const ;
 
     vec2<float> getCenter() const;
+    void rotate(float phi);
 };
 /*
 struct Rectangle final{
@@ -126,24 +127,24 @@ struct Matrix {
                 data[i][j] *= a;
         return *this;
     }
-    vec2<float> operator* (vec2<float> v) {
+    vec2<float> operator* (const vec2<float> &v) {
         return vec2<float>(v.x * data[0][0] + v.y * data[0][1], v.x * data[1][0] + v.y * data[1][1]);
     }
-    Matrix operator+ (Matrix other) const {
+    Matrix operator+ (const Matrix& other) const {
         Matrix res;
         for (int i = 0; i < 2; ++i)
             for (int j = 0; j < 2; ++j)
                 res.data[i][j] = data[i][j] + other.data[i][j];
         return res;
     }
-    Matrix operator- (Matrix other) const {
+    Matrix operator- (const Matrix& other) const {
         Matrix res;
         for (int i = 0; i < 2; ++i)
             for (int j = 0; j < 2; ++j)
                 res.data[i][j] = data[i][j] - other.data[i][j];
         return res;
     }
-    Matrix operator* (Matrix other) const {
+    Matrix operator* (const Matrix& other) const {
         Matrix res(0,0,0,0);
         for (int i = 0; i < 2; ++i)
             for (int j = 0; j < 2; ++j)
@@ -153,5 +154,6 @@ struct Matrix {
     }
     
 };
-float scalar_product(vec2<float> a, vec2<float> b);
-float angle_between(vec2<float> a, vec2<float> b);
+
+float angle_between(const vec2<float>& a, const vec2<float>& b);
+vec2<int> get_min_max(float a, float b, float c);

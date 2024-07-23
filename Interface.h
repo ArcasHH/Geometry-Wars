@@ -5,17 +5,15 @@ class IDrawable {
 protected:
 	Triangle sprite;
 public:
-	virtual void draw(BuffTy buffer) const {
-		sprite.draw(buffer);
-	}
+	virtual void draw(BuffTy buffer) const = 0;
 	virtual ~IDrawable() = default;
 };
 class IActable {
 protected:
-	Triangle start;
+	Triangle sprite;
 public:
 	IActable() = default;
-	IActable(Triangle start) : start{ start } {}
+	IActable(Triangle sprite) : sprite{ sprite } {}
 	virtual void act(float dt, vec2<float> vec) = 0;
 	virtual ~IActable() = default;
 };

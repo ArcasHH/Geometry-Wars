@@ -17,7 +17,10 @@ struct Enemy : public IDrawable, IObject, IActable {
 	void draw(BuffTy buffer) const override;
 
 	Enemy() = default;
-	Enemy(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ 1 }, damage{ 1 } {}
+	Enemy(Triangle tr, vec2<float> pos) 
+		: sprite{ tr }, position{ pos }, speed{}, dir{ 0, 1 }, health{ 1 }, damage{ 1 } { 
+		moveTo(pos);
+	}
 	void moveBy(vec2<float> vec);
 	void moveTo(vec2<float> vec);
 	void rotate(vec2<float> player_pos);

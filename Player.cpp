@@ -3,7 +3,7 @@
 
 
 
-void  Player::act(float dt) {  
+void  Player::act(float dt)  {
     can_shoot = true;
     rotate();
     control(dt);
@@ -14,7 +14,7 @@ void  Player::act(float dt) {
         bullet.act(dt);
     }
 }
-void Player::draw(BuffTy buffer) {
+void Player::draw(BuffTy buffer) const{
     sprite.draw(buffer);
     for (auto&& bullet : bullets) {
         bullet.draw(buffer);
@@ -23,8 +23,8 @@ void Player::draw(BuffTy buffer) {
 void Player::control(float dt) {
     //float scale_x = SPEED_SCALE_X * dt;
     //float scale_y = SPEED_SCALE_Y * dt;
-    float scale_x = SPEED_SCALE_X;
-    float scale_y = SPEED_SCALE_Y;
+    float scale_x = SPEED_SCALE;
+    float scale_y = SPEED_SCALE;
     if (is_control) {
         if (is_key_pressed('D')) {
             if (speed.x <= MAX_SPEED_X)
@@ -69,22 +69,22 @@ void Player::moveTo(vec2<float> vec) {
 bool Player::out_of_bounds() {
     vec2<float> center = sprite.getCenter();
     if (center.x <= BOUND_WIDTH) {
-        speed.x = SPEED_SCALE_X * 3 ;
+        speed.x = SPEED_SCALE * 3 ;
         is_control = false;
         return true;
     }
     if (center.y <= BOUND_WIDTH) {
-        speed.y = SPEED_SCALE_Y * 3;
+        speed.y = SPEED_SCALE * 3;
         is_control = false;
         return true;
     }
     if (center.x >= SCREEN_WIDTH - BOUND_WIDTH) {
-        speed.x = -SPEED_SCALE_X * 3;
+        speed.x = -SPEED_SCALE * 3;
         is_control = false;
         return true;
     }
     if (center.y >= SCREEN_HEIGHT - BOUND_WIDTH) {
-        speed.y = -SPEED_SCALE_Y * 3;
+        speed.y = -SPEED_SCALE * 3;
         is_control = false;
         return true;
     }
@@ -96,14 +96,10 @@ void Player::rotate() {
         vec2<float> m_pos(get_cursor_x(), get_cursor_y());
         float phi = angle_between(dir, m_pos - sprite.getCenter());
         dir = m_pos - sprite.getCenter();
-        Matrix m(phi);
-        vec2<float> p0 = sprite.getCenter();
-        sprite.p1 = m * (sprite.p1 - p0) + p0;
-        sprite.p2 = m * (sprite.p2 - p0) + p0;
-        sprite.p3 = m * (sprite.p3 - p0) + p0;  
-    }
-    
+        sprite.rotate(phi);
+    }  
 }
+
 
 void Player::shoot() {
      vec2<float> bullet_speed = dir;

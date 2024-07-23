@@ -31,36 +31,32 @@ void Enemy::moveTo(vec2<float> vec) {
 void Enemy::rotate(vec2<float> player_pos) {
     float phi = angle_between(dir, player_pos - sprite.getCenter());
     dir = player_pos - sprite.getCenter();
-    Matrix m(phi);
-    vec2<float> p0 = sprite.getCenter();
-    sprite.p1 = m * (sprite.p1 - p0) + p0;
-    sprite.p2 = m * (sprite.p2 - p0) + p0;
-    sprite.p3 = m * (sprite.p3 - p0) + p0;
+    sprite.rotate(phi);
 }
 void Enemy::navigate(vec2<float> player_pos) {
     vec2<float> nav = player_pos - position;
     nav.normalize();
     if(speed.length()<= MAX_ENEMY_SPEED)
-        speed += nav * SCALE_ENEMY_SPEED;
+        speed += nav * SPEED_SCALE;
     speed *= SPEED_FADE;
 }
 
 bool Enemy::out_of_bounds() {
     vec2<float> center = sprite.getCenter();
     if (center.x <= BOUND_WIDTH) {
-        speed.x = SCALE_ENEMY_SPEED * 3;
+        speed.x = SPEED_SCALE * 3;
         return true;
     }
     if (center.y <= BOUND_WIDTH) {
-        speed.y = SCALE_ENEMY_SPEED * 3;
+        speed.y = SPEED_SCALE * 3;
         return true;
     }
     if (center.x >= SCREEN_WIDTH - BOUND_WIDTH) {
-        speed.x = -SCALE_ENEMY_SPEED * 3;
+        speed.x = -SPEED_SCALE * 3;
         return true;
     }
     if (center.y >= SCREEN_HEIGHT - BOUND_WIDTH) {
-        speed.y = -SCALE_ENEMY_SPEED * 3;
+        speed.y = -SPEED_SCALE * 3;
         return true;
     }
     return false;

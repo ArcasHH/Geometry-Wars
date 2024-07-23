@@ -21,7 +21,7 @@ GameScene scene;
 // initialize game data in this function
 void initialize()
 {
-    scene.setPlayer(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0),  Color(255, 255, 255)));
+    scene.setPlayer(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0),  Color(255, 255, 255)), vec2<float>(SCREEN_WIDTH/2, SCREEN_HEIGHT/2));
 
     Triangle enemy_type1(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 0, 0)));
     scene.addEnemy(enemy_type1, vec2<float>(100,100));

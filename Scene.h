@@ -15,11 +15,11 @@ struct GameScene {
     GameScene& operator=(const GameScene&) = delete;
     GameScene& operator=(GameScene&& Other) = delete;
 
-    void setPlayer(Triangle tr);
+    void setPlayer(Triangle tr, vec2<float> position);
     void addEnemy(Triangle tr, vec2<float> position);
     
     void act(float dt);
-    void draw(BuffTy buffer);
+    void draw(BuffTy buffer)const;
 
 private:
     std::vector<std::unique_ptr<Enemy>> EnemyBuffer;

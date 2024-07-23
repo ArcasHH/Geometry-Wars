@@ -18,11 +18,11 @@ struct Player: public IDrawable, IObject{
 	int damage;
 
 	void act(float dt);
-	void draw(BuffTy buffer);
+	void draw(BuffTy buffer)const override;
 
     Player() = default;
-	Player(Triangle tr) : sprite{ tr }, position{ tr.getCenter() }, speed{}, dir{ 0, 1 }, health{ START_HEALTH }, damage{ START_DAMAGE } {
-		moveTo(vec2<float>(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)); //move player to screen center
+	Player(Triangle tr, vec2<float> pos) : sprite{ tr }, position{ pos}, speed{}, dir{ 0, 1 }, health{ START_HEALTH }, damage{ START_DAMAGE } {
+		moveTo(pos); 
 	}
 	//bool collide(Triangle& t);
 
