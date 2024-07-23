@@ -4,15 +4,14 @@ void GameScene::act(float dt) {
     
     for (auto&& obj : EnemyBuffer) {
         if (auto* ActObj = dynamic_cast<IActable*>(obj.get())) {
-            ActObj->act(dt, player_pos);
+            obj->player_pos = player->position; // enemy always know where player located
+            ActObj->act(dt);
             if (obj->kill_player) {
                 player->health -= obj->damage;
-                player->sprite.color = Color(255, 0, 0);
             }
         }
     }
-    player->act(dt);
-    player_pos = player->position;
+    player->act(dt); 
     if (player->health <= 0) {
         schedule_quit_game();
     }
@@ -24,9 +23,7 @@ void GameScene::draw(BuffTy buffer) const{
             DrObj->draw(buffer);
         }
     }
-    player->draw(buffer);
-    player->sprite.color = Color(255, 255, 255);
-    
+    player->draw(buffer);    
 }
 
 void GameScene::setPlayer(Triangle tr, vec2<float> pos) {

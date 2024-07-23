@@ -1,29 +1,15 @@
 #pragma once
-#include "Interface.h"
-#include "Constants.h"
+#include "Actor.h"
 
-struct Enemy : public IDrawable, IObject, IActable {
-	Triangle sprite;
-	vec2<float> position;
-	vec2<float> speed;
-	vec2<float> dir;
-	int health;
-	int damage;
+struct Enemy : Actor {
+	vec2<float> player_pos;
 	int score{ 0 };
-	bool is_alive{true};
 	bool kill_player{ false };
 
-	void act(float dt, vec2<float> player_pos) override;
-	void draw(BuffTy buffer) const override;
+	void act(float dt) override;
+	//void draw(BuffTy buffer) const ;
 
-	Enemy() = default;
-	Enemy(Triangle tr, vec2<float> pos) 
-		: sprite{ tr }, position{ pos }, speed{}, dir{ 0, 1 }, health{ 1 }, damage{ 1 } { 
-		moveTo(pos);
-	}
-	void moveBy(vec2<float> vec);
-	void moveTo(vec2<float> vec);
-	void rotate(vec2<float> player_pos);
+	Enemy(Triangle tr, vec2<float> pos) : Actor(tr, pos) {}
+
 	void navigate(vec2<float> player_pos);
-	bool out_of_bounds();
 };

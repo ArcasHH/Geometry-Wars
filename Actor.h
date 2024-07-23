@@ -9,12 +9,12 @@ struct Actor: public IDrawable, IActable{
 
 	int health{};
 	bool is_alive{ true };
-	int damage{};
+	int damage;
 	Actor() = default;
-	Actor(Triangle tr, vec2<float> pos) : sprite{ tr }, position{ pos }, dir{ 0, 1 } {
+	Actor(Triangle tr, vec2<float> pos) : sprite{ tr }, position{ pos }, dir{ 0, 1 }, damage{ 1 } {
 		moveTo(pos);
 	}
-	virtual void act(float dt);
+	virtual void act(float dt) = 0;
 	virtual void draw(BuffTy buffer)const override;
 
 	void moveBy(vec2<float> vec);

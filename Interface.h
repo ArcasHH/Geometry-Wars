@@ -14,7 +14,7 @@ protected:
 public:
 	IActable() = default;
 	IActable(Triangle sprite) : sprite{ sprite } {}
-	virtual void act(float dt, vec2<float> vec) = 0;
+	virtual void act(float dt) = 0;
 	virtual ~IActable() = default;
 };
 
