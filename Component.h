@@ -6,9 +6,8 @@
 #include <functional>
 #include <optional>
 
-#include "Object.h"
-//#include "System.h"
-// 
+#include "Math.h"
+
 namespace cmp {
     struct Position {
         float x;

@@ -9,6 +9,8 @@ namespace sys {
     void move(float dt);
     void rotate(float dt);
 
+    void act(float dt);
+
     //draw(buffer)
     void draw(BuffTy Buffer);
 };

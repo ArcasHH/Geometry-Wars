@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <memory.h>
 
-
 #include "System.h"
-
 
 //
 //  You are free to modify this file
@@ -24,11 +22,10 @@
 void initialize()
 {
     auto Sect = Reg.create();
-
     Reg.emplace<cmp::Sprite>(Sect, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Sect, 100.f, 100.f);
     Reg.emplace <Color>(Sect, Color{0, 255, 0});
-    Reg.emplace<cmp::Velocity>(Sect, 0.1f, 0.1f);
+    Reg.emplace<cmp::Velocity>(Sect, 0.01f, 0.01f);
     Reg.emplace<cmp::Rotation>(Sect, 0.001f);
 }
 
@@ -38,9 +35,7 @@ void act(float dt)
 {
   if (is_key_pressed(VK_ESCAPE))
     schedule_quit_game();
-
-  sys::move(dt);
-  sys::rotate(dt);
+  sys::act(dt);
 
 }
 
@@ -50,9 +45,7 @@ void draw()
 {
   // clear backbuffer
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
-
   sys::draw(buffer);
-
 }
 
 // free game data in this function

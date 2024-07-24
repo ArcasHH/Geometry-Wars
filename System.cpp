@@ -2,6 +2,10 @@
 
 
 //act(dt)
+void sys::act(float dt) {
+    rotate(dt);
+    move(dt);
+}
 void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
     for (auto&& [Ent, Vel] : View) {
