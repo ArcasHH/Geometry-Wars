@@ -44,6 +44,12 @@ namespace cmp {
     struct IsEnemy {
         uint64_t player_id;
     };
+    struct IsBullet {
+        uint64_t player_id;
+    };
+    struct IsActive {
+        bool is_active;
+    };
     
 };
 

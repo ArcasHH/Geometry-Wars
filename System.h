@@ -1,7 +1,9 @@
 #pragma once
 #include "Component.h"
 
-inline Registry<cmp::Sprite, cmp::Position, cmp::Velocity, Color, cmp::Rotation, cmp::Direction, cmp::IsPlayer, cmp::IsEnemy > Reg;
+inline Registry<cmp::Sprite, cmp::Position, cmp::Velocity, Color, cmp::Rotation, cmp::Direction,
+    cmp::IsPlayer, cmp::IsEnemy, cmp::IsBullet, 
+    cmp::IsActive > Reg;
 
 namespace sys {
 
@@ -16,6 +18,7 @@ namespace sys {
     void turnTowardsCursor();
     void turnTowardsPlayer();
 
+    void shoot();
     
 
     //draw(buffer)

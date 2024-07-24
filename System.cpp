@@ -40,12 +40,10 @@ bool sys::outOfBounds() {
         if (Pos.y < BOUND_WIDTH) {
             Pos.y = BOUND_WIDTH;
             is_out = true;
-
         }
         if (Pos.x > SCREEN_WIDTH - BOUND_WIDTH) {
             Pos.x = SCREEN_WIDTH - BOUND_WIDTH;
             is_out = true;
-
         }
         if (Pos.y > SCREEN_HEIGHT - BOUND_WIDTH) {
             Pos.y = SCREEN_HEIGHT - BOUND_WIDTH;
@@ -86,8 +84,33 @@ void sys::control(float dt) {
         if (!is_key_pressed('W') && !is_key_pressed('S')) { // speed fading
             CSpeed->dy *= SPEED_FADE;
         }
+        if (is_mouse_button_pressed(0)) {
+            sys::shoot();
+        }
     }
 }
+void sys::shoot() {
+    auto& View = Reg.view<cmp::IsBullet>();
+    for (auto&& [Ent, Bullet] : View) {
+        auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
+        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+        auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
+        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+        auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(Bullet.player_id);
+        auto CPlayerDir = Reg.findComponentOrNull<cmp::Direction>(Bullet.player_id);
+        if (CActive) CActive->is_active = true;
+        if (!CPos || !CVel || !CDir || !CRot || !CPlayerPos || !CPlayerDir)
+            continue;
+        (vec2<float>&)* CPos = (vec2<float>&) * CPlayerPos;
+        CRot->phi = angle_between((vec2<float>&) * CDir, (vec2<float>&) * CPlayerDir);
+        (vec2<float>&)* CDir = (vec2<float>&) * CPlayerDir;
+        //Speed Update
+        (vec2<float>&)* CVel = (vec2<float>&) * CDir * BULLET_SPEED;
+        break;
+    }
+}
+
 void sys::turnTowardsCursor() {
     auto& View = Reg.view<cmp::IsPlayer>();
     for (auto&& [Ent, Player] : View) {
@@ -111,16 +134,13 @@ void sys::turnTowardsPlayer() {
 
         if (!CRot || !CPos || !CDir || !CPlayerPos)
             continue;
-
-        //Turn towards the player
         vec2<float> NewDir(CPlayerPos->x - CPos->x, CPlayerPos->y - CPos->y);
         CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
         rotateVector(CRot->phi, (vec2<float>&)*CDir);
         //Speed Update
         auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-        (vec2<float>&)* CVel = (vec2<float>&)*CDir * MAX_ENEMY_SPEED;
-            
-       
+        if(CVel)
+            (vec2<float>&)* CVel = (vec2<float>&)*CDir * MAX_ENEMY_SPEED; 
     }
 }
 void sys::turnTowards() {
@@ -137,7 +157,9 @@ void sys::draw(BuffTy Buffer) {
     for (auto&& [Ent, Tr] : View) {
         auto CColor = Reg.findComponentOrNull<Color>(Ent);
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        if (!CPos || !CColor)
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+
+        if (!CPos || !CColor || !CActive->is_active)
             continue;
 
         vec2<int> p(static_cast<int>(CPos->x), static_cast<int>(CPos->y));

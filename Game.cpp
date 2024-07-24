@@ -17,9 +17,10 @@
 //  is_window_active() - returns true if window is active
 //  schedule_quit_game() - quit game after act()
 
-auto initializePlayer() {
+uint64_t initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::IsPlayer>(Player);
+    Reg.emplace<cmp::IsActive>(Player, true);
 
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
@@ -30,10 +31,10 @@ auto initializePlayer() {
     return Player;
 }
 
-
 void initializeEnemy(vec2<float> start_position, uint64_t player) {
     auto Enemy = Reg.create();
     Reg.emplace<cmp::IsEnemy>(Enemy, player);
+    Reg.emplace<cmp::IsActive>(Enemy, true);
 
     Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
@@ -41,6 +42,18 @@ void initializeEnemy(vec2<float> start_position, uint64_t player) {
     Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
+}
+void initializeBullet( uint64_t player) {
+    auto Bullet = Reg.create();
+    Reg.emplace<cmp::IsBullet>(Bullet, player);
+
+    Reg.emplace<cmp::IsActive>(Bullet, false);
+    Reg.emplace<cmp::Sprite>(Bullet, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Bullet, 0.f, 0.f);
+    Reg.emplace <Color>(Bullet, Color{ 200, 200, 200});
+    Reg.emplace<cmp::Velocity>(Bullet, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Bullet, 0.f);
+    Reg.emplace<cmp::Direction>(Bullet, 0.f, 1.f);
 }
 
 
@@ -51,6 +64,7 @@ void initialize()
     initializeEnemy(vec2<float>(100.f, 100.f), Player);
     initializeEnemy(vec2<float>(500.f, 700.f), Player);
     initializeEnemy(vec2<float>(700.f, 100.f), Player);
+    initializeBullet(Player);
 }
 
 // this function is called to update game data,
