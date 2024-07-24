@@ -32,7 +32,18 @@ namespace cmp {
         vec2<float> v2;
         vec2<float> v3;
     };
+    struct Control {
+        bool has_controller;
+    };
+    struct LookTowards {
+        vec2<float> dir;
+        LookTowards(float x, float y) :dir{ x,y } {}
+        LookTowards(vec2<float> vec) :dir{ vec } {}
+    };
 };
+
+
+
 
 template <typename ...Components>
 struct Registry {

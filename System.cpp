@@ -3,8 +3,11 @@
 
 //act(dt)
 void sys::act(float dt) {
+    control(dt);
+    TurnTowardsPoint();
     rotate(dt);
     move(dt);
+    outOfBounds();
 }
 void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
@@ -12,7 +15,6 @@ void sys::move(float dt) {
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
         CPos->x += Vel.dx;
         CPos->y += Vel.dy;
-
     }
 }
 
@@ -24,6 +26,81 @@ void sys::rotate(float dt) {
     }
 }
 
+bool sys::outOfBounds() {
+    auto& View = Reg.view<cmp::Position>();
+    bool is_out = false;
+    for (auto&& [Ent, Pos] : View) {
+        if (Pos.x < BOUND_WIDTH) {
+            Pos.x = BOUND_WIDTH;
+            is_out = true;
+        }
+        if (Pos.y < BOUND_WIDTH) {
+            Pos.y = BOUND_WIDTH;
+            is_out = true;
+
+        }
+        if (Pos.x > SCREEN_WIDTH - BOUND_WIDTH) {
+            Pos.x = SCREEN_WIDTH - BOUND_WIDTH;
+            is_out = true;
+
+        }
+        if (Pos.y > SCREEN_HEIGHT - BOUND_WIDTH) {
+            Pos.y = SCREEN_HEIGHT - BOUND_WIDTH;
+            is_out = true;
+        }
+    }
+    return is_out;
+}
+
+void sys::control(float dt) {
+    auto& View = Reg.view<cmp::Control>();
+    for (auto&& [Ent, CControl] : View) {  
+        auto CSpeed = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+        if (!CSpeed || !CControl.has_controller)
+            continue;
+        float scale_x = SPEED_SCALE;
+        float scale_y = SPEED_SCALE;
+    
+        if (is_key_pressed('D')) {
+            if (CSpeed->dx <= MAX_SPEED)
+                CSpeed->dx += scale_x;
+        }
+        if (is_key_pressed('A')) {
+            if (CSpeed->dx >= -MAX_SPEED)
+                CSpeed->dx -= scale_x;
+        }
+        if (is_key_pressed('S')) {
+            if (CSpeed->dy <= MAX_SPEED)
+                CSpeed->dy += scale_y;
+        }
+        if (is_key_pressed('W')) {
+            if (CSpeed->dy >= -MAX_SPEED)
+                CSpeed->dy -= scale_y;
+        }
+        if (!is_key_pressed('A') && !is_key_pressed('D')) { // speed fading
+            CSpeed->dx *= SPEED_FADE;
+        }
+        if (!is_key_pressed('W') && !is_key_pressed('S')) { // speed fading
+            CSpeed->dy *= SPEED_FADE;
+        }
+    }
+}
+
+void sys::TurnTowardsPoint() {
+    auto& View = Reg.view<cmp::LookTowards>();
+    for (auto&& [Ent, Dir] : View) {
+        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
+        auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
+        auto CControl = Reg.findComponentOrNull<cmp::Control>(Ent);
+        if (!CRot || !CPos|| !CControl)
+            continue;
+        if (CControl->has_controller) {
+            vec2<float> NewDir(get_cursor_x() - CPos->x, get_cursor_y() - CPos->y);
+            CRot->phi = angle_between(Dir.dir, NewDir);
+            rotateVector(CRot->phi, Dir.dir);
+        }
+    }
+}
 
 //draw(buffer)
 void sys::draw(BuffTy Buffer) {

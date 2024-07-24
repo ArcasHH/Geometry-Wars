@@ -21,12 +21,14 @@
 // initialize game data in this function
 void initialize()
 {
-    auto Sect = Reg.create();
-    Reg.emplace<cmp::Sprite>(Sect, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
-    Reg.emplace<cmp::Position>(Sect, 100.f, 100.f);
-    Reg.emplace <Color>(Sect, Color{0, 255, 0});
-    Reg.emplace<cmp::Velocity>(Sect, 0.01f, 0.01f);
-    Reg.emplace<cmp::Rotation>(Sect, 0.001f);
+    auto Player = Reg.create();
+    Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f);
+    Reg.emplace <Color>(Player, Color{0, 255, 0});
+    Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Player, 0.f);
+    Reg.emplace<cmp::Control>(Player, true);
+    Reg.emplace<cmp::LookTowards>(Player, 0.f,1.f);
 }
 
 // this function is called to update game data,
@@ -51,5 +53,6 @@ void draw()
 // free game data in this function
 void finalize()
 {
+    clear_buffer();
 }
 

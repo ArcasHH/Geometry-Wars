@@ -29,6 +29,10 @@ void rotateSprite(float phi, vec2<float>& v1, vec2<float>& v2, vec2<float>& v3) 
     v2 = m * v2;
     v3 = m * v3;
 }
+void rotateVector(float phi, vec2<float>& v) {
+    Matrix m(phi);
+    v = m * v;
+}
 
 
 vec2<int> get_min_max(float a, float b, float c) {

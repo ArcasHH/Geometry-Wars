@@ -120,9 +120,10 @@ struct Matrix {
     }
 };
 
- float angle_between(const vec2<float>& a, const vec2<float>& b);
- vec2<int> get_min_max(float a, float b, float c);
- float random(float a, float b);
+float angle_between(const vec2<float>& a, const vec2<float>& b);
+vec2<int> get_min_max(float a, float b, float c);
+float random(float a, float b);
 
 void rotateSprite(float phi, vec2<float>& v1, vec2<float>& v2, vec2<float>& v3);
- bool point_in_triangle(const vec2<int>& vec, vec2<float> p1, vec2<float> p2, vec2<float> p3);
+void rotateVector(float phi, vec2<float>& v);
+bool point_in_triangle(const vec2<int>& vec, vec2<float> p1, vec2<float> p2, vec2<float> p3);
