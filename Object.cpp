@@ -63,6 +63,12 @@ void Triangle2::rotate(float phi) {
     v2 = m * v2;
     v3 = m * v3;
 }
+void rotateSprite(float phi, vec2<float>& v1, vec2<float>& v2, vec2<float>& v3) {
+    Matrix m(phi);
+    v1 = m * v1;
+    v2 = m * v2;
+    v3 = m * v3;
+}
 
 
 vec2<int> get_min_max(float a, float b, float c) {
