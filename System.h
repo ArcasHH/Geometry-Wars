@@ -13,6 +13,7 @@ namespace sys {
     bool outOfBounds();
     void control(float dt);
     void TurnTowardsPoint();
+    void LookAtPoint(cmp::Position);
 
     //draw(buffer)
     void draw(BuffTy Buffer);

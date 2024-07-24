@@ -16,6 +16,7 @@
 //  clear_buffer() - set all pixels in buffer to 'black'
 //  is_window_active() - returns true if window is active
 //  schedule_quit_game() - quit game after act()
+
 void initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
@@ -26,22 +27,27 @@ void initializePlayer() {
     Reg.emplace<cmp::Control>(Player, true);
     Reg.emplace<cmp::LookTowards>(Player, 0.f, 1.f);
 }
-void initializePlayer2() {
-    auto Player2 = Reg.create();
-    Reg.emplace<cmp::Sprite>(Player2, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
-    Reg.emplace<cmp::Position>(Player2, 100.f, 100.f);
-    Reg.emplace <Color>(Player2, Color{ 255, 255, 0 });
-    Reg.emplace<cmp::Velocity>(Player2, 0.f, 0.f);
-    Reg.emplace<cmp::Rotation>(Player2, 0.f);
-    Reg.emplace<cmp::Control>(Player2, true);
-    Reg.emplace<cmp::LookTowards>(Player2, 0.f, 1.f);
+
+
+void initializeEnemy(vec2<float> start_position) {
+    auto Enemy = Reg.create();
+    Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
+    Reg.emplace <Color>(Enemy, Color{ 200, 0, 0 });
+    Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
+    Reg.emplace<cmp::Control>(Enemy, false);
+    Reg.emplace<cmp::LookTowards>(Enemy, 0.f, 1.f);
 }
+
 
 // initialize game data in this function
 void initialize()
 {
     initializePlayer();
-    initializePlayer2();
+    initializeEnemy(vec2<float>(100.f, 100.f));
+    initializeEnemy(vec2<float>(500.f, 700.f));
+    initializeEnemy(vec2<float>(700.f, 100.f));
 }
 
 // this function is called to update game data,
@@ -50,6 +56,7 @@ void act(float dt)
 {
   if (is_key_pressed(VK_ESCAPE))
     schedule_quit_game();
+
   sys::act(dt);
 
 }
@@ -60,6 +67,7 @@ void draw()
 {
   // clear backbuffer
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
+
   sys::draw(buffer);
 }
 

@@ -42,6 +42,8 @@ namespace cmp {
         LookTowards(vec2<float> v) : LookTowards{ v.x, v.y } {}
         operator vec2<float>() { return { dir_x, dir_y }; }
     };
+
+    
 };
 
 
