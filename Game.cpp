@@ -17,10 +17,26 @@
 //  is_window_active() - returns true if window is active
 //  schedule_quit_game() - quit game after act()
 
-uint64_t initializePlayer() {
+EntityId initializeBullet() {
+    auto Bullet = Reg.create();
+    Reg.emplace<cmp::IsBullet>(Bullet);
+
+    Reg.emplace<cmp::IsActive>(Bullet, false);
+    Reg.emplace<cmp::Sprite>(Bullet, vec2<float>(0.f, 10.f), vec2<float>(-5.f, -5.f), vec2<float>(5.f, -5.f));
+    Reg.emplace<cmp::Position>(Bullet, 0.f, 0.f);
+    Reg.emplace <Color>(Bullet, Color{ 255, 255, 255 });
+    Reg.emplace<cmp::Velocity>(Bullet, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Bullet, 0.f);
+    Reg.emplace<cmp::Direction>(Bullet, 0.f, 1.f);
+
+    return Bullet;
+}
+
+EntityId initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::IsPlayer>(Player);
     Reg.emplace<cmp::IsActive>(Player, true);
+    Reg.emplace<cmp::CanShoot>(Player, true, AMMO_RELOAD);
 
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
@@ -28,10 +44,17 @@ uint64_t initializePlayer() {
     Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Player, 0.f);
     Reg.emplace<cmp::Direction>(Player, 0.f, 1.f);
+
+    cmp::Ammo::AmmoStorage Ammo;
+    Ammo.reserve(AMMO_AMOUNT);
+    for (int I = 0; I != AMMO_AMOUNT; ++I)
+        Ammo.emplace_back(initializeBullet());
+    Reg.emplace<cmp::Ammo>(Player, std::move(Ammo));
+
     return Player;
 }
 
-void initializeEnemy(vec2<float> start_position, uint64_t player) {
+void initializeEnemy(vec2<float> start_position, EntityId player) {
     auto Enemy = Reg.create();
     Reg.emplace<cmp::IsEnemy>(Enemy, player);
     Reg.emplace<cmp::IsActive>(Enemy, true);
@@ -43,18 +66,7 @@ void initializeEnemy(vec2<float> start_position, uint64_t player) {
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
 }
-void initializeBullet( uint64_t player) {
-    auto Bullet = Reg.create();
-    Reg.emplace<cmp::IsBullet>(Bullet, player);
 
-    Reg.emplace<cmp::IsActive>(Bullet, false);
-    Reg.emplace<cmp::Sprite>(Bullet, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
-    Reg.emplace<cmp::Position>(Bullet, 0.f, 0.f);
-    Reg.emplace <Color>(Bullet, Color{ 200, 200, 200});
-    Reg.emplace<cmp::Velocity>(Bullet, 0.f, 0.f);
-    Reg.emplace<cmp::Rotation>(Bullet, 0.f);
-    Reg.emplace<cmp::Direction>(Bullet, 0.f, 1.f);
-}
 
 
 // initialize game data in this function
@@ -64,7 +76,6 @@ void initialize()
     initializeEnemy(vec2<float>(100.f, 100.f), Player);
     initializeEnemy(vec2<float>(500.f, 700.f), Player);
     initializeEnemy(vec2<float>(700.f, 100.f), Player);
-    initializeBullet(Player);
 }
 
 // this function is called to update game data,

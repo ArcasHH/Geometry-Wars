@@ -8,6 +8,9 @@
 
 #include "Math.h"
 
+using EntityId = uint64_t;
+
+
 namespace cmp {
     struct Position {
         float x;
@@ -42,16 +45,28 @@ namespace cmp {
     };
     struct IsPlayer {};
     struct IsEnemy {
-        uint64_t player_id;
+        EntityId player_id;
     };
-    struct IsBullet {
-        uint64_t player_id;
-    };
+    struct IsBullet {};
     struct IsActive {
         bool is_active;
     };
+    struct CanShoot {
+        
+        bool can_shoot;
+        float timer;
+    };
+    struct Ammo {
+        using AmmoStorage = std::vector<EntityId>;
+        AmmoStorage ammo_store;
+
+        Ammo(AmmoStorage &&Storage )
+            : ammo_store{std::move(Storage)}
+        {}
+    };
     
 };
+
 
 
 
@@ -67,7 +82,7 @@ struct Registry {
         operator size_t() const { return Val;  }
     };
 
-    using EntityId = uint64_t;
+    
 
     template <typename T>
     using ComponentStorage = std::vector<std::pair<EntityId, T>>;
@@ -137,4 +152,8 @@ struct Registry {
         return &getCmp<T>()[Idx].second;
     }
 
+    
+
 };
+
+

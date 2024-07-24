@@ -8,14 +8,14 @@ void sys::act(float dt) {
     rotate(dt);
     move(dt);
     outOfBounds();
+    ammoReload( dt);
 }
 void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
     for (auto&& [Ent, Vel] : View) {
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        if (!CPos)
-            continue;
-        (vec2<float>&)*CPos += Vel;
+        if (!CPos)  continue;
+        (vec2<float>&)*CPos += (vec2<float>&)Vel * dt * 1000;
     }
 }
 
@@ -23,44 +23,58 @@ void sys::rotate(float dt) {
     auto& View = Reg.view<cmp::Rotation>();
     for (auto&& [Ent, Angle] : View) {
         auto CTr = Reg.findComponentOrNull<cmp::Sprite>(Ent);
-        if (!CTr)
-            continue;
+        if (!CTr)  continue;
         rotateSprite(Angle.phi, CTr->v1, CTr->v2, CTr->v3);
+        Angle.phi = 0.f;
     }
 }
 
-bool sys::outOfBounds() {
+void sys::outOfBounds() {
     auto& View = Reg.view<cmp::Position>();
-    bool is_out = false;
     for (auto&& [Ent, Pos] : View) {
+        bool is_out = false;
+
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+
+        if (!CVel || !CActive || !(CActive->is_active))
+            continue;
         if (Pos.x < BOUND_WIDTH) {
+            CVel->dx = 0;
             Pos.x = BOUND_WIDTH;
             is_out = true;
         }
         if (Pos.y < BOUND_WIDTH) {
+            CVel->dy = 0;
             Pos.y = BOUND_WIDTH;
             is_out = true;
         }
         if (Pos.x > SCREEN_WIDTH - BOUND_WIDTH) {
+            CVel->dx = 0;
             Pos.x = SCREEN_WIDTH - BOUND_WIDTH;
             is_out = true;
         }
         if (Pos.y > SCREEN_HEIGHT - BOUND_WIDTH) {
+            CVel->dy = 0;
             Pos.y = SCREEN_HEIGHT - BOUND_WIDTH;
             is_out = true;
         }
+        auto CBullet = Reg.findComponentOrNull<cmp::IsBullet>(Ent);
+        if (CBullet && is_out) { // until the bullet goes beyond the border, it cannot be used
+            CActive->is_active = false;
+        }
     }
-    return is_out;
 }
 
 void sys::control(float dt) {
     auto& View = Reg.view<cmp::IsPlayer>();
     for (auto&& [Ent, Player] : View) {  
         auto CSpeed = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-        if (!CSpeed)
-            continue;
-        float scale_x = SPEED_SCALE;
-        float scale_y = SPEED_SCALE;
+
+        if (!CSpeed)  continue;
+        float scale_x = SPEED_SCALE * dt * 1000;
+        float scale_y = SPEED_SCALE * dt * 1000;
+        
     
         if (is_key_pressed('D')) {
             if (CSpeed->dx <= MAX_SPEED)
@@ -85,22 +99,34 @@ void sys::control(float dt) {
             CSpeed->dy *= SPEED_FADE;
         }
         if (is_mouse_button_pressed(0)) {
-            sys::shoot();
+            auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(Ent);
+            if (CShoot && CShoot->can_shoot) {
+                sys::shoot();
+                CShoot->timer = AMMO_RELOAD;
+                CShoot->can_shoot = false;
+            }
+            
         }
     }
 }
 void sys::shoot() {
-    auto& View = Reg.view<cmp::IsBullet>();
-    for (auto&& [Ent, Bullet] : View) {
-        auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-        auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
-        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
-        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
-        auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(Bullet.player_id);
-        auto CPlayerDir = Reg.findComponentOrNull<cmp::Direction>(Bullet.player_id);
-        if (CActive) CActive->is_active = true;
-        if (!CPos || !CVel || !CDir || !CRot || !CPlayerPos || !CPlayerDir)
+    auto PlayerEnt = getPlayer();
+    auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
+    auto CPlayerDir = Reg.findComponentOrNull<cmp::Direction>(PlayerEnt);
+
+    auto CAmmo = Reg.findComponentOrNull<cmp::Ammo>(PlayerEnt);
+
+    for (int i = 0; i < AMMO_AMOUNT; ++i) {
+        EntityId BulletEnt = CAmmo->ammo_store[i];
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(BulletEnt);
+        if (CActive->is_active || !CActive)
+            continue;
+        CActive->is_active = true;
+        auto CPos = Reg.findComponentOrNull<cmp::Position>(BulletEnt);
+        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(BulletEnt);
+        auto CDir = Reg.findComponentOrNull<cmp::Direction>(BulletEnt);
+        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(BulletEnt);
+        if (!CPos || !CVel || !CDir || !CRot )
             continue;
         (vec2<float>&)* CPos = (vec2<float>&) * CPlayerPos;
         CRot->phi = angle_between((vec2<float>&) * CDir, (vec2<float>&) * CPlayerDir);
@@ -108,6 +134,20 @@ void sys::shoot() {
         //Speed Update
         (vec2<float>&)* CVel = (vec2<float>&) * CDir * BULLET_SPEED;
         break;
+    }
+}
+
+void bulletCollideEnemy() {
+
+}
+void ammoReload(float dt) {
+    auto PlayerEnt = getPlayer();
+    auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(PlayerEnt);
+    if (CShoot->timer < FLOAT_PRECISE) {
+        CShoot->can_shoot = true;
+    }
+    else {
+        CShoot->timer-=dt;
     }
 }
 
@@ -175,4 +215,10 @@ void sys::draw(BuffTy Buffer) {
             }
         }
     }
+}
+
+EntityId getPlayer() {
+    auto& PlayerView = Reg.view<cmp::IsPlayer>();
+    auto&& [PlayerEnt, _] = PlayerView.front();
+    return PlayerEnt;
 }
