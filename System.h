@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 
-inline Registry<cmp::Sprite, cmp::Position, cmp::Velocity, Color, cmp::Rotation, cmp::Control, cmp::LookTowards > Reg;
+inline Registry<cmp::Sprite, cmp::Position, cmp::Velocity, Color, cmp::Rotation, cmp::Direction, cmp::IsPlayer, cmp::IsEnemy > Reg;
 
 namespace sys {
 
@@ -12,8 +12,11 @@ namespace sys {
     void rotate(float dt);
     bool outOfBounds();
     void control(float dt);
-    void turnTowardsPoint();
-    void LookAtPoint(cmp::Position);
+    void turnTowards();
+    void turnTowardsCursor();
+    void turnTowardsPlayer();
+
+    
 
     //draw(buffer)
     void draw(BuffTy Buffer);

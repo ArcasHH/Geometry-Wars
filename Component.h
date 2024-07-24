@@ -32,17 +32,16 @@ namespace cmp {
         vec2<float> v2;
         vec2<float> v3;
     };
-    struct Control {
-        bool has_controller;
-    };
-    struct LookTowards {
+
+    struct Direction {
         float dir_x;
         float dir_y;
-        LookTowards(float dx, float dy) :dir_x{ dx }, dir_y{ dy } {}
-        LookTowards(vec2<float> v) : LookTowards{ v.x, v.y } {}
+        Direction(float dx, float dy) :dir_x{ dx }, dir_y{ dy } {}
+        Direction(vec2<float> v) : Direction{ v.x, v.y } {}
         operator vec2<float>() { return { dir_x, dir_y }; }
     };
-
+    struct IsPlayer {};
+    struct IsEnemy {};
     
 };
 

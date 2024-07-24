@@ -4,7 +4,7 @@
 //act(dt)
 void sys::act(float dt) {
     control(dt);
-    turnTowardsPoint();
+    turnTowards();
     rotate(dt);
     move(dt);
     outOfBounds();
@@ -56,10 +56,10 @@ bool sys::outOfBounds() {
 }
 
 void sys::control(float dt) {
-    auto& View = Reg.view<cmp::Control>();
-    for (auto&& [Ent, CControl] : View) {  
+    auto& View = Reg.view<cmp::IsPlayer>();
+    for (auto&& [Ent, Player] : View) {  
         auto CSpeed = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-        if (!CSpeed || !CControl.has_controller)
+        if (!CSpeed)
             continue;
         float scale_x = SPEED_SCALE;
         float scale_y = SPEED_SCALE;
@@ -88,42 +88,47 @@ void sys::control(float dt) {
         }
     }
 }
-
-void sys::turnTowardsPoint() {
-    auto& View = Reg.view<cmp::LookTowards>();
-    for (auto&& [Ent, Dir] : View) {
+void sys::turnTowardsCursor() {
+    auto& View = Reg.view<cmp::IsPlayer>();
+    for (auto&& [Ent, Player] : View) {
         auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        auto CControl = Reg.findComponentOrNull<cmp::Control>(Ent);
-        if (!CRot || !CPos|| !CControl)
+        auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
+        if (!CRot || !CPos || !CDir)
             continue;
-        // Player control
-        if (CControl->has_controller) { 
-            //Turn towards the cursor
-            vec2<float> NewDir(get_cursor_x() - CPos->x, get_cursor_y() - CPos->y);
-            CRot->phi = angle_between((vec2<float>&)Dir, NewDir);
-            rotateVector(CRot->phi, (vec2<float>&)Dir);
+        vec2<float> NewDir(get_cursor_x() - CPos->x, get_cursor_y() - CPos->y);
+        CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
+        rotateVector(CRot->phi, (vec2<float>&)*CDir);
+    }
+}
+void sys::turnTowardsPlayer() {
+    auto& View = Reg.view<cmp::IsEnemy>();
+    for (auto&& [Ent, Enemy] : View) {
+        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
+        auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
+        auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
+        if (!CRot || !CPos || !CDir)
+            continue;
+        auto& PlayerView = Reg.view<cmp::IsPlayer>(); // need to find player
+        for (auto&& [PlayerEnt, Player] : PlayerView) {
+            auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
+            if (!CPlayerPos)
+                continue;
+            //Turn towards the player
+            vec2<float> NewDir(CPlayerPos->x - CPos->x, CPlayerPos->y - CPos->y);
+            CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
+            rotateVector(CRot->phi, (vec2<float>&)*CDir);
+            //Speed Update
+            auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+            (vec2<float>&)* CVel = (vec2<float>&)*CDir * MAX_ENEMY_SPEED;
+            break; //enough one player entity (first initialized)
+            
         }
-        // Enemy control
-        else { 
-            auto& PlayerView = Reg.view<cmp::Control>(); // need to find player
-            for (auto&& [PlayerEny, CPlayerControl] : PlayerView) {
-                if (CPlayerControl.has_controller) {
-                    auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEny);
-                    if (!CPlayerPos)
-                        continue;
-                    //Turn towards the player
-                    vec2<float> NewDir(CPlayerPos->x - CPos->x, CPlayerPos->y - CPos->y);
-                    CRot->phi = angle_between((vec2<float>&)Dir, NewDir);
-                    rotateVector(CRot->phi, (vec2<float>&)Dir);
-                    //Speed Update
-                    auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-                    (vec2<float>&)* CVel = (vec2<float>&)Dir * MAX_ENEMY_SPEED;
-                    break; //enough one player entity (first initialized)
-                }
-            }
-        }
-    } 
+    }
+}
+void sys::turnTowards() {
+    sys::turnTowardsCursor();
+    sys::turnTowardsPlayer();
 }
 
 

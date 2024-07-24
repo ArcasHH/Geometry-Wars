@@ -19,25 +19,27 @@
 
 void initializePlayer() {
     auto Player = Reg.create();
+    Reg.emplace<cmp::IsPlayer>(Player);
+
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
     Reg.emplace <Color>(Player, Color{ 0, 255, 0 });
     Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Player, 0.f);
-    Reg.emplace<cmp::Control>(Player, true);
-    Reg.emplace<cmp::LookTowards>(Player, 0.f, 1.f);
+    Reg.emplace<cmp::Direction>(Player, 0.f, 1.f);
 }
 
 
 void initializeEnemy(vec2<float> start_position) {
     auto Enemy = Reg.create();
+    Reg.emplace<cmp::IsEnemy>(Enemy);
+
     Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
     Reg.emplace <Color>(Enemy, Color{ 200, 0, 0 });
     Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
-    Reg.emplace<cmp::Control>(Enemy, false);
-    Reg.emplace<cmp::LookTowards>(Enemy, 0.f, 1.f);
+    Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
 }
 
 
