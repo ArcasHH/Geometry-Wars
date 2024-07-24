@@ -52,6 +52,10 @@ struct Registry {
     using AllComponentStorage = std::tuple<ComponentStorage<Components>...>;
     AllComponentStorage Storage;
 
+    template <typename T, typename Tuple>
+    struct has_type;
+    template <typename T, typename... Us>
+    struct has_type<T, std::tuple<Us...>> : std::disjunction<std::is_same<ComponentStorage<T>, Us>...> {};
 
     std::vector<EntityId> EntityStorage;
 
@@ -66,10 +70,12 @@ struct Registry {
 
     template <typename T>
     auto& getCmp() {
+        static_assert(has_type<T, AllComponentStorage>(), "Accessing commonent was not recorded.");
         return std::get<ComponentStorage<T>>(Storage);
     }
     template <typename T>
     auto& getMap() {
+        static_assert(has_type<T, AllComponentStorage>(), "Accessing commonent was not recorded.");
         return std::get<ComponentMap<T>>(Map);
     }
 
