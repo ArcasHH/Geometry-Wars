@@ -36,9 +36,11 @@ namespace cmp {
         bool has_controller;
     };
     struct LookTowards {
-        vec2<float> dir;
-        LookTowards(float x, float y) :dir{ x,y } {}
-        LookTowards(vec2<float> vec) :dir{ vec } {}
+        float dir_x;
+        float dir_y;
+        LookTowards(float dx, float dy) :dir_x{ dx }, dir_y{ dy } {}
+        LookTowards(vec2<float> v) : LookTowards{ v.x, v.y } {}
+        operator vec2<float>() { return { dir_x, dir_y }; }
     };
 };
 
@@ -48,13 +50,21 @@ namespace cmp {
 template <typename ...Components>
 struct Registry {
 
+    template <typename T>
+    struct IdxWrapper final {
+        size_t Val;
+        IdxWrapper() = default;
+        IdxWrapper(size_t Val) : Val{Val} {}
+        operator size_t() const { return Val;  }
+    };
+
     using EntityId = uint64_t;
 
     template <typename T>
     using ComponentStorage = std::vector<std::pair<EntityId, T>>;
 
     template <typename T>
-    using ComponentMap = std::unordered_map< EntityId, typename ComponentStorage<T>::iterator>; // this std::any is a pointer to specific iterator;
+    using ComponentMap = std::unordered_map< EntityId, IdxWrapper<T>>; // this std::any is a pointer to specific iterator;
 
     using AllComponentMap = std::tuple<ComponentMap<Components>...>;
     AllComponentMap Map;
@@ -93,12 +103,11 @@ struct Registry {
     void emplace(EntityId Id, Args && ... args) {
         auto& CmpStorage = getCmp<T>();
 
+        auto Size = CmpStorage.size();
         CmpStorage.emplace_back(std::pair{ Id, T{ std::forward<Args>(args)... } });
 
-        auto It = std::prev(CmpStorage.end());
-
         auto& CmpMap = getMap<T>();
-        auto [_, IsInserted] = CmpMap.emplace(Id, It);
+        auto [_, IsInserted] = CmpMap.emplace(Id, Size);
         if (!IsInserted)
             throw std::runtime_error{ "Component for entiry has been already recorded\n" };
     }
@@ -115,7 +124,8 @@ struct Registry {
         if (FindIt == CmpMap.end())
             return nullptr;
 
-        return &FindIt->second->second;
+        auto Idx = FindIt->second;
+        return &getCmp<T>()[Idx].second;
     }
 
 };

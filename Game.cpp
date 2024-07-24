@@ -16,19 +16,32 @@
 //  clear_buffer() - set all pixels in buffer to 'black'
 //  is_window_active() - returns true if window is active
 //  schedule_quit_game() - quit game after act()
-
+void initializePlayer() {
+    auto Player = Reg.create();
+    Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
+    Reg.emplace <Color>(Player, Color{ 0, 255, 0 });
+    Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Player, 0.f);
+    Reg.emplace<cmp::Control>(Player, true);
+    Reg.emplace<cmp::LookTowards>(Player, 0.f, 1.f);
+}
+void initializePlayer2() {
+    auto Player2 = Reg.create();
+    Reg.emplace<cmp::Sprite>(Player2, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Player2, 100.f, 100.f);
+    Reg.emplace <Color>(Player2, Color{ 255, 255, 0 });
+    Reg.emplace<cmp::Velocity>(Player2, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Player2, 0.f);
+    Reg.emplace<cmp::Control>(Player2, true);
+    Reg.emplace<cmp::LookTowards>(Player2, 0.f, 1.f);
+}
 
 // initialize game data in this function
 void initialize()
 {
-    auto Player = Reg.create();
-    Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
-    Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH/2.f, SCREEN_HEIGHT/2.f);
-    Reg.emplace <Color>(Player, Color{0, 255, 0});
-    Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
-    Reg.emplace<cmp::Rotation>(Player, 0.f);
-    Reg.emplace<cmp::Control>(Player, true);
-    Reg.emplace<cmp::LookTowards>(Player, 0.f,1.f);
+    initializePlayer();
+    initializePlayer2();
 }
 
 // this function is called to update game data,
@@ -55,4 +68,5 @@ void finalize()
 {
     clear_buffer();
 }
+
 

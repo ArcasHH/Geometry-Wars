@@ -13,8 +13,9 @@ void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
     for (auto&& [Ent, Vel] : View) {
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        CPos->x += Vel.dx;
-        CPos->y += Vel.dy;
+        if (!CPos)
+            continue;
+        (vec2<float>&)*CPos += Vel;
     }
 }
 
@@ -22,6 +23,8 @@ void sys::rotate(float dt) {
     auto& View = Reg.view<cmp::Rotation>();
     for (auto&& [Ent, Angle] : View) {
         auto CTr = Reg.findComponentOrNull<cmp::Sprite>(Ent);
+        if (!CTr)
+            continue;
         rotateSprite(Angle.phi, CTr->v1, CTr->v2, CTr->v3);
     }
 }
@@ -96,8 +99,8 @@ void sys::TurnTowardsPoint() {
             continue;
         if (CControl->has_controller) {
             vec2<float> NewDir(get_cursor_x() - CPos->x, get_cursor_y() - CPos->y);
-            CRot->phi = angle_between(Dir.dir, NewDir);
-            rotateVector(CRot->phi, Dir.dir);
+            CRot->phi = angle_between((vec2<float>&)Dir, NewDir);
+            rotateVector(CRot->phi, (vec2<float>&)Dir);
         }
     }
 }
