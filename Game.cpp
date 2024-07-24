@@ -17,7 +17,7 @@
 //  is_window_active() - returns true if window is active
 //  schedule_quit_game() - quit game after act()
 
-void initializePlayer() {
+auto initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::IsPlayer>(Player);
 
@@ -27,12 +27,13 @@ void initializePlayer() {
     Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Player, 0.f);
     Reg.emplace<cmp::Direction>(Player, 0.f, 1.f);
+    return Player;
 }
 
 
-void initializeEnemy(vec2<float> start_position) {
+void initializeEnemy(vec2<float> start_position, uint64_t player) {
     auto Enemy = Reg.create();
-    Reg.emplace<cmp::IsEnemy>(Enemy);
+    Reg.emplace<cmp::IsEnemy>(Enemy, player);
 
     Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
@@ -46,10 +47,10 @@ void initializeEnemy(vec2<float> start_position) {
 // initialize game data in this function
 void initialize()
 {
-    initializePlayer();
-    initializeEnemy(vec2<float>(100.f, 100.f));
-    initializeEnemy(vec2<float>(500.f, 700.f));
-    initializeEnemy(vec2<float>(700.f, 100.f));
+    auto Player = initializePlayer();
+    initializeEnemy(vec2<float>(100.f, 100.f), Player);
+    initializeEnemy(vec2<float>(500.f, 700.f), Player);
+    initializeEnemy(vec2<float>(700.f, 100.f), Player);
 }
 
 // this function is called to update game data,

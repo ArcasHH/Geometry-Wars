@@ -107,23 +107,20 @@ void sys::turnTowardsPlayer() {
         auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
         auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
-        if (!CRot || !CPos || !CDir)
+        auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(Enemy.player_id);
+
+        if (!CRot || !CPos || !CDir || !CPlayerPos)
             continue;
-        auto& PlayerView = Reg.view<cmp::IsPlayer>(); // need to find player
-        for (auto&& [PlayerEnt, Player] : PlayerView) {
-            auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
-            if (!CPlayerPos)
-                continue;
-            //Turn towards the player
-            vec2<float> NewDir(CPlayerPos->x - CPos->x, CPlayerPos->y - CPos->y);
-            CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
-            rotateVector(CRot->phi, (vec2<float>&)*CDir);
-            //Speed Update
-            auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-            (vec2<float>&)* CVel = (vec2<float>&)*CDir * MAX_ENEMY_SPEED;
-            break; //enough one player entity (first initialized)
+
+        //Turn towards the player
+        vec2<float> NewDir(CPlayerPos->x - CPos->x, CPlayerPos->y - CPos->y);
+        CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
+        rotateVector(CRot->phi, (vec2<float>&)*CDir);
+        //Speed Update
+        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+        (vec2<float>&)* CVel = (vec2<float>&)*CDir * MAX_ENEMY_SPEED;
             
-        }
+       
     }
 }
 void sys::turnTowards() {

@@ -41,7 +41,9 @@ namespace cmp {
         operator vec2<float>() { return { dir_x, dir_y }; }
     };
     struct IsPlayer {};
-    struct IsEnemy {};
+    struct IsEnemy {
+        uint64_t player_id;
+    };
     
 };
 
