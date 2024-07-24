@@ -24,7 +24,7 @@ static bool point_in_triangle(const vec2<int>& vec, const Triangle2& t) {
         return true;
     return false;
 }
-static bool point_in_triangle(const vec2<int>& vec, vec2<float> p1, vec2<float> p2, vec2<float> p3) {
+bool point_in_triangle(const vec2<int>& vec, vec2<float> p1, vec2<float> p2, vec2<float> p3) {
     vec2<float> v(static_cast<float>(vec.x), static_cast<float>(vec.y));
     float a = (p1 - v).cross(p2 - p1);
     float b = (p2 - v).cross(p3 - p2);

@@ -8,7 +8,7 @@ struct Actor: public IDrawable, IActable{
 
 	int health{};
 	bool is_alive{ true };
-	int damage;
+	int damage{};
 	Actor() = default;
 	Actor(Triangle2 tr) : sprite{ tr }, dir{ 0, 1 }, damage{ 1 } {}
 	virtual void act(float dt) = 0;

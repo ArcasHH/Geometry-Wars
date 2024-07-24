@@ -26,15 +26,26 @@ namespace cmp {
     struct Position {
         float x;
         float y;
+
+        Position(float x, float y) :x{x}, y{y} {}
+        Position(vec2<float> v) : Position{v.x, v.y} {}
+        operator vec2<float>() { return { x, y }; }
     };
     struct Velocity {
         float dx;
         float dy;
     };
+    struct Sprite {
+        vec2<float> v1;
+        vec2<float> v2;
+        vec2<float> v3;
+    };
 };
 
 template <typename ...Components>
 struct Registry {
+
+
     using EntityId = uint64_t;
 
     template <typename T>
@@ -48,6 +59,7 @@ struct Registry {
 
     using AllComponentStorage = std::tuple<ComponentStorage<Components>...>;
     AllComponentStorage Storage;
+
 
     std::vector<EntityId> EntityStorage;
 
@@ -100,36 +112,44 @@ struct Registry {
 
 };
 
-Registry<Triangle2, cmp::Position, cmp::Velocity> Reg;
+Registry<cmp::Sprite, cmp::Position, Color, cmp::Velocity > Reg;
 
 namespace sys {
 
     void draw(BuffTy Buffer) {
 
-        auto& View = Reg.view<Triangle2>();
+        auto& View = Reg.view<cmp::Sprite>();
 
-        for (auto&& [Ent, Cmp] : View) {
-            Cmp.draw(Buffer);
+        for(auto && [Ent, Tr] : View) {
+            auto CColor = Reg.findComponentOrNull<Color>(Ent);
+            auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
+            if (!CPos || !CColor)
+                continue;
+            Triangle2 triangl(Tr.v1, Tr.v2, Tr.v3, *CColor, *CPos);
+            triangl.draw(buffer);
+#if 0
+            vec2<int> p(static_cast<int>(Pos.x), static_cast<int>(Pos.y));
+            vec2<int> y = get_min_max(Tr.v1.y, Tr.v2.y, Tr.v3.y) + vec2<int>(p.y, p.y);
+            vec2<int> x = get_min_max(Tr.v1.x, Tr.v2.x, Tr.v3.x) + vec2<int>(p.x, p.x);
+            for (int j = y.x; j <= y.y; ++j)
+                for (int i = x.x; i <= x.y; ++i) {
+                    //if (!RotatedAndMoved.point_in(i, j))
+                    //    continue;
+
+                    if (point_in_triangle(vec2<int>(i, j), Tr.v1 + Pos, Tr.v2 + Pos, Tr.v3 + Pos)) {
+                        if (i<0 || i > SCREEN_WIDTH || j < 0 || j > SCREEN_HEIGHT)
+                            continue;
+                        buffer[j][i] = CColor->data;
+                    }
+                }
+#endif
+
         }
+
     }
 
-    void move() {
-
-        auto& TView = Reg.view<Triangle2>();
-
-
-        for (auto&& [Ent, Cmp] : TView) {
-           
-            auto FindIt = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-            if (!FindIt)
-                continue;
-            vec2<float> d ( FindIt->dx, FindIt->dy);
-
-            Cmp.position += d;
-
-        }
-
-
+    void move(float dt) {
+        auto& TView = Reg.view<cmp::Sprite>();
     }
 
 };
@@ -150,10 +170,12 @@ void initialize()
 
     auto Sect = Reg.create();
 
-    Reg.emplace<Triangle2>(FirstTriangle, vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 200, 0));
+    //Reg.emplace<Triangle2>(FirstTriangle, vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 200, 0));
 
-    Reg.emplace<Triangle2>(Sect, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
-
+    //Reg.emplace<Triangle2>(Sect, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
+    Reg.emplace<cmp::Sprite>(Sect, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace<cmp::Position>(Sect, 150.f, 230.f);
+    Reg.emplace <Color>(Sect, Color{0, 255, 0});
     Reg.emplace<cmp::Velocity>(Sect, 0.1f, 0.1f);
 
 }
@@ -167,7 +189,7 @@ void act(float dt)
 
   scene.act(dt);
 
-  sys::move();
+  sys::move(dt);
 
 }
 

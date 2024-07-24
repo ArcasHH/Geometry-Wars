@@ -26,4 +26,4 @@ constexpr  float  SPEED_FADE = 0.999f; // 1 - does not fade ( x-axis ), 0 - ther
 // SPEED_FADE comment: if you put more than 1, then everything will break
 //static_assert(SPEED_FADE < 1.f);
 
-constexpr float FLOAT_PRECISE = 1e-5;
+constexpr float FLOAT_PRECISE = 1e-5f;
