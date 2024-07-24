@@ -4,7 +4,7 @@
 //act(dt)
 void sys::act(float dt) {
     control(dt);
-    TurnTowardsPoint();
+    turnTowardsPoint();
     rotate(dt);
     move(dt);
     outOfBounds();
@@ -89,7 +89,7 @@ void sys::control(float dt) {
     }
 }
 
-void sys::TurnTowardsPoint() {
+void sys::turnTowardsPoint() {
     auto& View = Reg.view<cmp::LookTowards>();
     for (auto&& [Ent, Dir] : View) {
         auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);

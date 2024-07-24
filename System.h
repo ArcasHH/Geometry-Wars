@@ -12,7 +12,7 @@ namespace sys {
     void rotate(float dt);
     bool outOfBounds();
     void control(float dt);
-    void TurnTowardsPoint();
+    void turnTowardsPoint();
     void LookAtPoint(cmp::Position);
 
     //draw(buffer)

@@ -12,7 +12,7 @@ constexpr float PUSHING_ENEMIES = 6.f;
 constexpr float TIME_TO_ACT = 1.f; // time before enemies start act
 
 constexpr  float  MAX_SPEED = 0.5f;//maximum possible player speed (speed limit)
-constexpr  float  MAX_ENEMY_SPEED = 0.1f;
+constexpr  float  MAX_ENEMY_SPEED = 0.3f;
 //constexpr float SQ_MAX_SPEED = 1.f;
 
 constexpr  float  SPEED_SCALE = 0.001f;//the coefficient of speed change when control(). // must not exceed the value of MAX_SPEED
