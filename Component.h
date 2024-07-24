@@ -64,6 +64,12 @@ namespace cmp {
             : ammo_store{std::move(Storage)}
         {}
     };
+    struct Health {
+        int health;
+    };
+    struct Damage {
+        int damage;
+    };
     
 };
 
@@ -152,7 +158,11 @@ struct Registry {
         return &getCmp<T>()[Idx].second;
     }
 
-    
+    EntityId getPlayer() {
+        auto& PlayerView = view<cmp::IsPlayer>();
+        auto&& [PlayerEnt, _] = PlayerView.front();
+        return PlayerEnt;
+    }
 
 };
 

@@ -37,6 +37,8 @@ EntityId initializePlayer() {
     Reg.emplace<cmp::IsPlayer>(Player);
     Reg.emplace<cmp::IsActive>(Player, true);
     Reg.emplace<cmp::CanShoot>(Player, true, AMMO_RELOAD);
+    Reg.emplace<cmp::Health>(Player, 10);
+    Reg.emplace<cmp::Damage>(Player, 1);
 
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
@@ -58,6 +60,8 @@ void initializeEnemy(vec2<float> start_position, EntityId player) {
     auto Enemy = Reg.create();
     Reg.emplace<cmp::IsEnemy>(Enemy, player);
     Reg.emplace<cmp::IsActive>(Enemy, true);
+    Reg.emplace<cmp::Health>(Enemy, 1);
+    Reg.emplace<cmp::Damage>(Enemy, 1);
 
     Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
@@ -85,6 +89,7 @@ void act(float dt)
   if (is_key_pressed(VK_ESCAPE))
     schedule_quit_game();
 
+  sys::update(dt);
   sys::act(dt);
 
 }
