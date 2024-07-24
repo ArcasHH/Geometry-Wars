@@ -2,8 +2,7 @@
 #include "Interface.h"
 
 struct Actor: public IDrawable, IActable{
-	Triangle sprite;
-	vec2<float> position;
+	Triangle2 sprite;
 	vec2<float> speed{};
 	vec2<float> dir;
 
@@ -11,9 +10,7 @@ struct Actor: public IDrawable, IActable{
 	bool is_alive{ true };
 	int damage;
 	Actor() = default;
-	Actor(Triangle tr, vec2<float> pos) : sprite{ tr }, position{ pos }, dir{ 0, 1 }, damage{ 1 } {
-		moveTo(pos);
-	}
+	Actor(Triangle2 tr) : sprite{ tr }, dir{ 0, 1 }, damage{ 1 } {}
 	virtual void act(float dt) = 0;
 	virtual void draw(BuffTy buffer)const override;
 

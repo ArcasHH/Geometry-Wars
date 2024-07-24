@@ -17,13 +17,15 @@ struct Player: Actor{
 	void draw(BuffTy buffer)const override;
 
     Player() = default;
-	Player(Triangle tr, vec2<float> pos) : Actor(tr, pos) {
+	Player(Triangle2 tr) : Actor(tr) {
 		health = START_HEALTH;
 		damage = START_DAMAGE;
 
-		Bullet bullet(Triangle(vec2<float>(5, 20), vec2<float>(0, 0), vec2<float>(10, 0), Color(255, 255, 255)), position, dir);
+		Bullet bullet(Triangle2(vec2<float>(5, 20), vec2<float>(0, 0), vec2<float>(10, 0), Color(255, 255, 255)), dir);
+
 		for (int i = 0; i < AMMO_AMOUNT; ++i) {
 			ammo[i] = bullet;
+			bullet.moveTo(sprite.position);
 		}
 	}
 

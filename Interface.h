@@ -3,27 +3,27 @@
 
 class IDrawable {
 protected:
-	Triangle sprite;
+	Triangle2 sprite;
 public:
 	virtual void draw(BuffTy buffer) const = 0;
 	virtual ~IDrawable() = default;
 };
 class IActable {
 protected:
-	Triangle sprite;
+	Triangle2 sprite;
 public:
 	IActable() = default;
-	IActable(Triangle sprite) : sprite{ sprite } {}
+	IActable(Triangle2 sprite) : sprite{ sprite } {}
 	virtual void act(float dt) = 0;
 	virtual ~IActable() = default;
 };
 
 class IObject {
 protected:
-	Triangle sprite;
+	Triangle2 sprite;
 public:
 	IObject() = default;
-	IObject(Triangle obj) : sprite{ obj } {}
-	const Triangle& getTriangle() const { return sprite; }
+	IObject(Triangle2 obj) : sprite{ obj } {}
+	const Triangle2& getTriangle() const { return sprite; }
 	virtual ~IObject() = default;
 };

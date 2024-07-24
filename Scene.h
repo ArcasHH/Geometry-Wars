@@ -14,8 +14,8 @@ struct GameScene {
     GameScene& operator=(const GameScene&) = delete;
     GameScene& operator=(GameScene&& Other) = delete;
 
-    void setPlayer(Triangle tr, vec2<float> position);
-    void addEnemy(Triangle tr, vec2<float> position);
+    void setPlayer(Triangle2 tr, vec2<float> position);
+    void addEnemy(Triangle2 tr, vec2<float> position);
     
     void act(float dt);
     void draw(BuffTy buffer)const;

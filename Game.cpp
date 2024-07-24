@@ -100,13 +100,13 @@ struct Registry {
 
 };
 
-Registry<Triangle, cmp::Position, cmp::Velocity> Reg;
+Registry<Triangle2, cmp::Position, cmp::Velocity> Reg;
 
 namespace sys {
 
     void draw(BuffTy Buffer) {
 
-        auto& View = Reg.view<Triangle>();
+        auto& View = Reg.view<Triangle2>();
 
         for (auto&& [Ent, Cmp] : View) {
             Cmp.draw(Buffer);
@@ -115,7 +115,7 @@ namespace sys {
 
     void move() {
 
-        auto& TView = Reg.view<Triangle>();
+        auto& TView = Reg.view<Triangle2>();
 
 
         for (auto&& [Ent, Cmp] : TView) {
@@ -125,9 +125,7 @@ namespace sys {
                 continue;
             vec2<float> d ( FindIt->get().dx, FindIt->get().dy);
 
-            Cmp.p1 += d;
-            Cmp.p2 += d;
-            Cmp.p3 += d;
+            Cmp.position += d;
 
         }
 
@@ -140,9 +138,9 @@ GameScene scene;
 // initialize game data in this function
 void initialize()
 {
-    scene.setPlayer(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0),  Color(255, 255, 255)), vec2<float>(SCREEN_WIDTH/2, SCREEN_HEIGHT/2));
+    scene.setPlayer(Triangle2(vec2<float>(0, 30), vec2<float>(-15, -15), vec2<float>(15, -15),  Color(255, 255, 255)), vec2<float>(SCREEN_WIDTH/2, SCREEN_HEIGHT/2));
 
-    Triangle enemy_type1(Triangle(vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 0, 0)));
+    Triangle2 enemy_type1(Triangle2(vec2<float>(0, 30), vec2<float>(-15, -15), vec2<float>(15, -15), Color(200, 0, 0)));
     scene.addEnemy(enemy_type1, vec2<float>(100,100));
     scene.addEnemy(enemy_type1, vec2<float>(700, 700));
     scene.addEnemy(enemy_type1, vec2<float>(700, 500));
@@ -152,9 +150,9 @@ void initialize()
 
     auto Sect = Reg.create();
 
-    Reg.emplace<Triangle>(FirstTriangle, vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 200, 0));
+    Reg.emplace<Triangle2>(FirstTriangle, vec2<float>(15, 45), vec2<float>(0, 0), vec2<float>(30, 0), Color(200, 200, 0));
 
-    Reg.emplace<Triangle>(Sect, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
+    Reg.emplace<Triangle2>(Sect, vec2<float>(15, 45), vec2<float>(100, 0), vec2<float>(30, 100), Color(200, 200, 200));
 
     Reg.emplace<cmp::Velocity>(Sect, 0.1f, 0.1f);
 

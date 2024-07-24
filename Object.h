@@ -80,19 +80,20 @@ struct vec2 final {
     float cross(vec2<T> a) const { return x * a.y - y * a.x; }
 };
 
-
-struct Triangle final {
-    vec2<float> p1, p2, p3;
+struct Triangle2 final {
+    vec2<float> v1, v2, v3;
+    vec2<float> position;
     Color color;
 
-    Triangle() = default;
-    Triangle(vec2<float> pos1, vec2<float> pos2, vec2<float> pos3, Color c) :
-        p1{ pos1 }, p2{ pos2 }, p3{ pos3 }, color{ c } {}
+    Triangle2() = default;
+    Triangle2(vec2<float> pos1, vec2<float> pos2, vec2<float> pos3, Color c) :
+        v1{ pos1 }, v2{ pos2 }, v3{ pos3 }, color{ c } {}
+    Triangle2(vec2<float> pos1, vec2<float> pos2, vec2<float> pos3, Color c, vec2<float> pos) :
+        v1{ pos1 }, v2{ pos2 }, v3{ pos3 }, color{ c }, position{ pos } {}
 
-    Triangle& operator=(const Triangle& Other) = default;
-    void draw(BuffTy buffer) const ;
+    Triangle2& operator=(const Triangle2& Other) = default;
+    void draw(BuffTy buffer) const;
 
-    vec2<float> getCenter() const;
     void rotate(float phi);
 };
 /*

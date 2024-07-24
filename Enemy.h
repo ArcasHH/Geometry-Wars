@@ -10,7 +10,7 @@ struct Enemy : Actor {
 	void act(float dt) override;
 	//void draw(BuffTy buffer) const ;
 
-	Enemy(Triangle tr, vec2<float> pos) : Actor(tr, pos) {}
+	Enemy(Triangle2 tr) : Actor(tr) {}
 	~Enemy() = default;
 	bool is_collide(vec2<float> obj_pos, float sq_distance);
 private:

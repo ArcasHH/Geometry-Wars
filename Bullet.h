@@ -9,7 +9,7 @@ struct Bullet:Actor{
 	void draw(BuffTy buffer)const override;
 
 	Bullet() = default;
-	Bullet(Triangle tr, vec2<float> pos, vec2<float> direction) : Actor(tr, pos) {
+	Bullet(Triangle2 tr, vec2<float> direction) : Actor(tr) {
 		is_alive = false;
 		dir = direction;
 		speed = dir.normalized() * BULLET_SPEED;

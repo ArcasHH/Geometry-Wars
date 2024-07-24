@@ -65,7 +65,7 @@ void Player::shoot() {
     for (int i = 0; i < AMMO_AMOUNT; ++i) {
         if (!ammo[i].is_alive) {
             ammo[i].is_alive = true;
-            ammo[i].moveTo(position);
+            ammo[i].moveTo(sprite.position);
             ammo[i].set_dir(vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));        
             break;
         }

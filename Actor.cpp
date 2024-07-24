@@ -5,24 +5,21 @@ void Actor::draw(BuffTy buffer) const {
 }
 
 void Actor::moveBy(vec2<float> vec) {
-    sprite.p1 += vec;
-    sprite.p2 += vec;
-    sprite.p3 += vec;
-    position = sprite.getCenter();
+    sprite.position += vec;
 }
 void Actor::moveTo(vec2<float> vec) {
-    moveBy(vec - sprite.getCenter());
+    moveBy(vec - sprite.position);
 }
 void Actor::turnSide(vec2<float> point) { //Look in the direction of the point
-    float phi = angle_between(dir, point - sprite.getCenter());
-    dir = point - sprite.getCenter();
+    float phi = angle_between(dir, point - sprite.position);
+    dir = point - sprite.position;
     sprite.rotate(phi);
 }
 void control(float dt) {
 
 }
 bool Actor::out_of_bounds() {
-    vec2<float> center = sprite.getCenter();
+    vec2<float> center = sprite.position;
     if (center.x <= BOUND_WIDTH) {
         speed.x = SPEED_SCALE * 3;
         return true;
