@@ -9,13 +9,14 @@ void  Player::act(float dt)  {
     control(dt);
     ammoReload(dt);
     out_of_bounds();
-    moveBy(speed);
+    
     is_control = true;
     for (auto&& bullet : ammo) {
         bullet.act(dt);
     }
     if (health <= 0)
         schedule_quit_game(); ///die_screen
+    moveBy(speed);
 
 }
 void Player::draw(BuffTy buffer) const{

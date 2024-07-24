@@ -89,13 +89,13 @@ struct Registry {
     }
 
     template<typename T>
-    auto findComponentOrNone(EntityId Ent) -> std::optional<std::reference_wrapper<T>> {
+    T* findComponentOrNull(EntityId Ent) {
         auto& CmpMap = getMap<T>();
         auto FindIt = CmpMap.find(Ent);
         if (FindIt == CmpMap.end())
-            return std::nullopt;
+            return nullptr;
 
-        return FindIt->second->second;
+        return &FindIt->second->second;
     }
 
 };
@@ -120,10 +120,10 @@ namespace sys {
 
         for (auto&& [Ent, Cmp] : TView) {
            
-            auto FindIt = Reg.findComponentOrNone<cmp::Velocity>(Ent);
+            auto FindIt = Reg.findComponentOrNull<cmp::Velocity>(Ent);
             if (!FindIt)
                 continue;
-            vec2<float> d ( FindIt->get().dx, FindIt->get().dy);
+            vec2<float> d ( FindIt->dx, FindIt->dy);
 
             Cmp.position += d;
 
