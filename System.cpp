@@ -6,21 +6,18 @@ void sys::act(float dt) {
 
     transform(dt);
 
-    turnTowards(dt);
-
-    
-
-    control(dt);
-    ammoReload(dt);
+    playerControl(dt);
+    EnemyAI(dt);
 
     updateHealth(dt);
     updateScenario(dt);
 
-    playerCollideEnemy();
+    checkPlayerEnemyCollide();
     bulletCollideEnemy();
 }
 
-//Transform system: needs componets as position, velocity and rotation (maybe union velocity and position to one component tranformComponent?)
+
+//Transform system
 void sys::transform(float dt) {
     rotate();
     move(dt); 
@@ -86,146 +83,104 @@ void sys::outOfBounds() {
         }
     }
 }
+void sys::turnTowards(EntityId ent_id, vec2<float> pos) {
+    auto CRot = Reg.findComponentOrNull<cmp::Rotation>(ent_id);
+    auto CPos = Reg.findComponentOrNull<cmp::Position>(ent_id);
+    auto CDir = Reg.findComponentOrNull<cmp::Direction>(ent_id);
+    if (!CRot || !CPos || !CDir)
+        return;
+    CRot->phi = angle_between(CDir->direction, pos - CPos->position);
+    rotateVector(CRot->phi, CDir->direction);
+}
+void sys::moveInDir(EntityId ent_id, float dt) {
+    auto CDir = Reg.findComponentOrNull<cmp::Direction>(ent_id);
+    auto CVel = Reg.findComponentOrNull<cmp::Velocity>(ent_id);
+    if (!CDir || !CDir || (CVel && (CVel->velocity).length() > CVel->max_speed))
+        return;
+    if (CVel->speed_scale > 0)
+        CVel->velocity += CDir->direction * CVel->speed_scale * dt;
+    else
+        CVel->velocity = CDir->direction * CVel->max_speed;
+}
+bool sys::isEntitiesCollide(EntityId ent1_id, EntityId ent2_id) {
+    auto CActive1 = Reg.findComponentOrNull<cmp::IsActive>(ent1_id);
+    auto CActive2 = Reg.findComponentOrNull<cmp::IsActive>(ent2_id);
+    if (!(CActive1->is_active) || !(CActive2->is_active))
+        return false;
+    auto CPos1 = Reg.findComponentOrNull<cmp::Position>(ent1_id);
+    auto CColl1 = Reg.findComponentOrNull<cmp::Collision>(ent1_id);
+    auto CPos2 = Reg.findComponentOrNull<cmp::Position>(ent2_id);
+    auto CColl2 = Reg.findComponentOrNull<cmp::Collision>(ent2_id);
+    if(!CPos1 || !CPos2 || ! CColl1 || ! CColl2)
+        return false;
 
-
-
-void sys::killEnemy(EntityId enemy_id) {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CScore = Reg.findComponentOrNull<cmp::IsPlayer>(PlayerEnt);
-    auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(enemy_id);
-    CScore->curr_score += CEnemy->cost;
-
+    float dist = CColl1->collide_distance + CColl2->collide_distance;
+    if ((CPos1->position - CPos2->position).sq_length() < dist * dist)
+        return true;
+    return false;
 }
 
+//Player act system
+void sys::playerControl(float dt) {
+    control(dt);
+    turnTowardsCursor();
+    ammoReload(dt);
+}
 void sys::control(float dt) {
-    auto& View = Reg.view<cmp::IsPlayer>();
-    for (auto&& [Ent, _] : View) {  
-        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-        if (!CVel)
-            continue;
-        float scale = SPEED_SCALE * dt;
-        if (is_key_pressed('D')) {
-            if (CVel->velocity.x <= MAX_SPEED)
-                CVel->velocity.x += scale;
-        }
-        if (is_key_pressed('A')) {
-            if (CVel->velocity.x >= -MAX_SPEED)
-                CVel->velocity.x -= scale;
-        }
-        if (is_key_pressed('S')) {
-            if (CVel->velocity.y <= MAX_SPEED)
-                CVel->velocity.y += scale;
-        }
-        if (is_key_pressed('W')) {
-            if (CVel->velocity.y >= -MAX_SPEED)
-                CVel->velocity.y -= scale;
-        }
-        if (is_mouse_button_pressed(0)) {
-            auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(Ent);
-            if (CShoot->can_shoot) {
-                sys::shoot();
-                CShoot->reload_timer = AMMO_RELOAD;
-                CShoot->can_shoot = false;
-            }   
-        }
+    auto PlayerEnt = Reg.getPlayer();
+    auto CVel = Reg.findComponentOrNull<cmp::Velocity>(PlayerEnt);
+    if (!CVel)
+        return;
+    float scale = SPEED_SCALE * dt;
+    if (is_key_pressed('D')) {
+        if (CVel->velocity.x <= MAX_SPEED)
+            CVel->velocity.x += scale;
+    }
+    if (is_key_pressed('A')) {
+        if (CVel->velocity.x >= -MAX_SPEED)
+            CVel->velocity.x -= scale;
+    }
+    if (is_key_pressed('S')) {
+        if (CVel->velocity.y <= MAX_SPEED)
+            CVel->velocity.y += scale;
+    }
+    if (is_key_pressed('W')) {
+        if (CVel->velocity.y >= -MAX_SPEED)
+            CVel->velocity.y -= scale;
+    }
+    if (is_mouse_button_pressed(0)) {
+        auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(PlayerEnt);
+        if (CShoot->can_shoot) {
+            sys::shoot(dt);
+            CShoot->reload_timer = AMMO_RELOAD;
+            CShoot->can_shoot = false;
+        }   
     }
 }
-void sys::shoot() {
+void sys::turnTowardsCursor() {
+    auto PlayerEnt = Reg.getPlayer();
+    turnTowards(PlayerEnt, vec2<float>(get_cursor_x(), get_cursor_y()));
+}
+void sys::shoot(float dt) {
     auto PlayerEnt = Reg.getPlayer();
     auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
     auto CPlayerDir = Reg.findComponentOrNull<cmp::Direction>(PlayerEnt);
-
     auto CAmmo = Reg.findComponentOrNull<cmp::Ammo>(PlayerEnt);
-
     for (int i = 0; i < AMMO_AMOUNT; ++i) {
         EntityId BulletEnt = CAmmo->ammo_store[i];
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(BulletEnt);
-        if (CActive->is_active)
+        auto CPos = Reg.findComponentOrNull<cmp::Position>(BulletEnt);
+
+        if (CActive->is_active || !CPos)
             continue;
         CActive->is_active = true;
-        auto CPos = Reg.findComponentOrNull<cmp::Position>(BulletEnt);
-        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(BulletEnt);
-        auto CDir = Reg.findComponentOrNull<cmp::Direction>(BulletEnt);
-        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(BulletEnt);
-        if (!CPos || !CVel || !CDir || !CRot )
-            continue;
-        //turn towards the direction of the player
         CPos->position = CPlayerPos->position;
-        CRot->phi = angle_between( CDir->direction,  CPlayerDir->direction);
-        CDir->direction = CPlayerDir->direction;
-        //Speed Update
-        CVel->velocity =  CDir->direction * BULLET_SPEED;
-        break;
+
+        turnTowards(BulletEnt, CPlayerPos->position + CPlayerDir->direction);
+        moveInDir(BulletEnt, dt);
+        break; // need to find first not active bullet
     }
 }
-
-void sys::bulletCollideEnemy() {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CAmmo = Reg.findComponentOrNull<cmp::Ammo>(PlayerEnt);
-    for (int i = 0; i < AMMO_AMOUNT; ++i) {
-        EntityId BulletEnt = CAmmo->ammo_store[i];
-        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(BulletEnt);
-        auto CPos = Reg.findComponentOrNull<cmp::Position>(BulletEnt);
-        auto CColl = Reg.findComponentOrNull<cmp::Collision>(BulletEnt);
-
-        if (!CActive->is_active || !CActive || !CPos || !CColl)
-            continue;
-
-        auto& View = Reg.view<cmp::IsEnemy>();
-        for (auto&& [EnemyEnt, _] : View) {
-            auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
-            auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
-            auto CEnemyColl = Reg.findComponentOrNull<cmp::Collision>(EnemyEnt);
-
-            if (!CEnemyPos || !(CEnemyActive->is_active) || !CEnemyColl)
-                continue;
-            if ((CPos->position - CEnemyPos->position).sq_length() <= 
-                (CColl->collide_distance + CEnemyColl->collide_distance)* (CColl->collide_distance + CEnemyColl->collide_distance)  ) {
-                
-                CActive->is_active = false;
-                auto CPlayerDamage = Reg.findComponentOrNull<cmp::Damage>(PlayerEnt);
-                auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(EnemyEnt);
-                if (!CPlayerDamage || !CEnemyHealth)
-                    continue;
-                CEnemyHealth->curr_health -= CPlayerDamage->damage;
-            }
-        }
-    }
-}
-
-void sys::playerCollideEnemy() {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
-    auto CPlayerColl = Reg.findComponentOrNull<cmp::Collision>(PlayerEnt);
-
-    auto& View = Reg.view<cmp::IsEnemy>();
-    for (auto&& [EnemyEnt, _] : View) {
-        auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
-        auto CEnemyColl = Reg.findComponentOrNull<cmp::Collision>(EnemyEnt);
-        auto CEnemyVel = Reg.findComponentOrNull<cmp::Velocity>(EnemyEnt);
-
-        auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
-
-        if (!CEnemyActive->is_active || !CEnemyPos || !CEnemyColl)
-            continue;
-        if ((CPlayerPos->position - CEnemyPos->position).sq_length() <= 
-            (CPlayerColl->collide_distance+CEnemyColl->collide_distance)* (CPlayerColl->collide_distance + CEnemyColl->collide_distance)) {
-            pushEnemy(CEnemyVel->velocity);
-            auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
-            auto CEnemyDamage = Reg.findComponentOrNull<cmp::Damage>(EnemyEnt);
-            if (!CPlayerHealth || !CEnemyDamage)
-                continue;
-            CPlayerHealth->curr_health -= CEnemyDamage->damage;
-        }
-    }
-}
-
-void sys::pushEnemy(vec2<float>& enemy_speed) {
-    enemy_speed *= (-PUSH_ENEMIES);
-    if (enemy_speed.length() > 10 * ENEMY_MAX_SPEED)
-        enemy_speed = enemy_speed.normalized() * 10 * ENEMY_MAX_SPEED;
-}
-
 void sys::ammoReload(float dt) {
     auto PlayerEnt = Reg.getPlayer();
     auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(PlayerEnt);
@@ -233,48 +188,75 @@ void sys::ammoReload(float dt) {
         CShoot->can_shoot = true;
     }
     else {
-        CShoot->reload_timer -=dt;
+        CShoot->reload_timer -= dt;
     }
 }
 
-void sys::turnTowardsCursor() {
-    auto& View = Reg.view<cmp::IsPlayer>();
-    for (auto&& [Ent, Player] : View) {
-        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(Ent);
-        auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
-        if (!CRot || !CPos || !CDir)
-            continue;
-        vec2<float> NewDir(get_cursor_x() - CPos->position.x, get_cursor_y() - CPos->position.y);
-        CRot->phi = angle_between(CDir->direction, NewDir);
-        rotateVector(CRot->phi, CDir->direction);
-    }
-}
-void sys::turnTowardsPlayer(float dt) {
+//Enemy AI
+void sys::EnemyAI(float dt) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
     auto& View = Reg.view<cmp::IsEnemy>();
     for (auto&& [EnemyEnt, Enemy] : View) {
-        auto CRot = Reg.findComponentOrNull<cmp::Rotation>(EnemyEnt);
-        auto CPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
-        auto CDir = Reg.findComponentOrNull<cmp::Direction>(EnemyEnt);
-        auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(Enemy.player_id);
+        turnTowards(EnemyEnt, CPlayerPos->position);
+        moveInDir(EnemyEnt, dt);
+    }
+}
 
-        if (!CRot || !CPos || !CDir || !CPlayerPos)
-            continue;
-        CRot->phi = angle_between(CDir->direction, CPlayerPos->position - CPos->position);
-        rotateVector(CRot->phi, CDir->direction);
-        //Speed Update
-        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(EnemyEnt);
-        if (CVel && (CVel->velocity).length() < ENEMY_MAX_SPEED) {
-            CVel->velocity += CDir->direction * ENEMY_SPEED_SCALE * dt;
+//Bullet->Enemy system
+void sys::bulletCollideEnemy() {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CAmmo = Reg.findComponentOrNull<cmp::Ammo>(PlayerEnt);
+    for (int i = 0; i < AMMO_AMOUNT; ++i) {
+        EntityId BulletEnt = CAmmo->ammo_store[i];
+
+        auto& View = Reg.view<cmp::IsEnemy>();
+        for (auto&& [EnemyEnt, _] : View) {
+            auto CActive = Reg.findComponentOrNull<cmp::IsActive>(BulletEnt);
+            if(!(isEntitiesCollide(BulletEnt, EnemyEnt)) || !CActive)
+                continue;
+            CActive->is_active = false;
+            getDamage(EnemyEnt, PlayerEnt);
+            
         }
     }
 }
-void sys::turnTowards(float dt) {
-    sys::turnTowardsCursor();
-    sys::turnTowardsPlayer(dt);
+//Enemy->Player system
+void sys::checkPlayerEnemyCollide() {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
+    auto CPlayerColl = Reg.findComponentOrNull<cmp::Collision>(PlayerEnt);
+    if (!CPlayerPos || !CPlayerColl)
+        return;
+    auto& View = Reg.view<cmp::IsEnemy>();
+    for (auto&& [EnemyEnt, EnemyCost] : View) {
+        auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
+        auto CEnemyColl = Reg.findComponentOrNull<cmp::Collision>(EnemyEnt);
+        auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
+        if (!CEnemyPos || !CEnemyColl || !CEnemyActive->is_active)
+            continue;
+        float dist = CPlayerColl->collide_distance + CEnemyColl->collide_distance;
+        if ((CPlayerPos->position - CEnemyPos->position).sq_length() > dist * dist)
+            continue;
+        PlayerEnemyCollide(EnemyEnt);
+    }
 }
-
-
+void sys::PlayerEnemyCollide(EntityId& enemy_id) {
+    auto CEnemyVel = Reg.findComponentOrNull<cmp::Velocity>(enemy_id);
+    pushEnemy(CEnemyVel->velocity);
+    getDamage(Reg.getPlayer(), enemy_id);
+}
+void sys::pushEnemy(vec2<float>& enemy_speed) {
+    enemy_speed *= (-PUSH_ENEMIES);
+    if (enemy_speed.length() > 10 * ENEMY_MAX_SPEED)
+        enemy_speed = enemy_speed.normalized() * 10 * ENEMY_MAX_SPEED;
+}
+void sys::killEnemy(EntityId enemy_id) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CScore = Reg.findComponentOrNull<cmp::IsPlayer>(PlayerEnt);
+    auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(enemy_id);
+    CScore->curr_score += CEnemy->cost;
+}
 
 // Health system
 void sys::updateHealth(float dt) {
@@ -286,7 +268,6 @@ void sys::checkHealth() {
     auto& View = Reg.view<cmp::Health>();
     for (auto&& [Ent, CHealth] : View) {
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
-
         if (!CActive->is_active || CHealth.curr_health > 0)
             continue;
         CActive->is_active = false;
@@ -322,7 +303,13 @@ void sys::diaplayPlayerHealth() {
     CPlayerColor->r = red;
     CPlayerColor->g = 255 - red;
 }
-
+void sys::getDamage(EntityId ent_id, EntityId damager_id) {
+    auto CHealth = Reg.findComponentOrNull<cmp::Health>(ent_id);
+    auto CDamage = Reg.findComponentOrNull<cmp::Damage>(damager_id);
+    if (!CDamage || !CHealth)
+        return;
+    CHealth->curr_health -= CDamage->damage;
+}
 
 // Scenario
 void sys::updateScenario(float dt) {
@@ -338,7 +325,7 @@ void sys::updateScenario(float dt) {
         if (CPlayerScore->curr_score <= ENEMY_AMOUNT / 2)
             continue;
         CPlayerScore->curr_score = 0;
-        for (int i = 0; i < CEnemies->enemy_store.size() - ENEMY_AMOUNT; ++i) {
+        for (int i = 0; i < CEnemies->enemy_store.size(); ++i) {
             EntityId Enemy = CEnemies->enemy_store[i];
             ActivatelEnemy(Enemy);
         }

@@ -41,6 +41,8 @@ namespace cmp {
     };
     struct Velocity {
         vec2<float> velocity;
+        float max_speed;
+        float speed_scale;
     };
     struct Rotation {
         float phi;
@@ -68,6 +70,7 @@ namespace cmp {
     struct Health {
         int curr_health;
         int max_health;
+        
         bool can_regenerate;
         float curr_regeneration_time;
         float regeneration_time;

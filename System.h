@@ -14,54 +14,49 @@ namespace sys {
     //act(dt)
     void act(float dt);
 
-    
-    void turnTowards(float dt);
-
-    //player act
-    void control(float dt); //Обработка нажатий
-    void turnTowardsCursor(); // Всегда смотрит в направлении курсора
-    //Player->bullets  --- shooting
-    void ammoReload(float dt);
-    void shoot();
-
-    //enemy ai
-    void EnemyAI(float dt);
-    void turnTowardsPlayer(float dt);
-
     //Transform system
     void transform(float dt);
     void move(float dt);
     void rotate();
     void outOfBounds();
+    void turnTowards(EntityId ent_id, vec2<float> pos);
+    void moveInDir(EntityId ent_id, float dt);
+    bool isEntitiesCollide(EntityId ent1_id, EntityId ent2_id);
     
+    //player act
+    void playerControl(float dt);
+    void control(float dt); 
+    void turnTowardsCursor(); 
+    //Player->bullets  --- shooting
+    void ammoReload(float dt);
+    void shoot(float dt);
+
+    //enemy ai
+    void EnemyAI(float dt);
+
     
-    // 
-    
-    // Three type collisions of entities:
-    //Bullets->enemy --- hitt  enemy
+    //Bullets->enemy --- hit  enemy
     void bulletCollideEnemy();
+
     //Enemy->player --- enemy damage player
-    void PlayerEnemyCollide();
-    void playerCollideEnemy();
-    void pushEnemy(vec2<float>& enemy_speed);
+    void checkPlayerEnemyCollide();
     void killEnemy(EntityId enemy_id); //player get score++
-    
-
-
+    void PlayerEnemyCollide(EntityId& enemy_id);
+    void pushEnemy(vec2<float>& enemy_speed);
 
     //health system:
     void updateHealth(float dt);
+
     void checkHealth();
     void Regeneration(float dt);
     void diaplayPlayerHealth();
+    void getDamage(EntityId ent_id, EntityId damager_id);
 
     //scenario
     void updateScenario(float dt);
     void ActivatelEnemy(EntityId enemy_id);
 
-
     //render system
-    //draw(buffer)
     void draw(BuffTy Buffer);
 
 };

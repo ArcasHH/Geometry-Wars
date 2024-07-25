@@ -24,7 +24,7 @@ EntityId initializeBullet() {
     Reg.emplace<cmp::TriangleSprite>(Bullet, Triangle(vec2<float>(0.f, 10.f), vec2<float>(-5.f, -5.f), vec2<float>(5.f, -5.f)));
     Reg.emplace <cmp::Color>(Bullet, cmp::Color{ 255, 255, 255 });
     Reg.emplace<cmp::Position>(Bullet, vec2<float>{});
-    Reg.emplace<cmp::Velocity>(Bullet, vec2<float>{});
+    Reg.emplace<cmp::Velocity>(Bullet, vec2<float>{}, BULLET_SPEED, 0.f);
     Reg.emplace<cmp::Rotation>(Bullet, 0.f);
     Reg.emplace<cmp::Direction>(Bullet, vec2<float>{0.f, 1.f});
     Reg.emplace<cmp::Collision>(Bullet, 1.f);
@@ -41,7 +41,7 @@ EntityId initializeEnemy1(vec2<float> start_position, EntityId player) {
     Reg.emplace<cmp::TriangleSprite>(Enemy, Triangle(vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f)));
     Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 0 });
     Reg.emplace<cmp::Position>(Enemy, start_position);
-    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{});
+    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{}, ENEMY_MAX_SPEED, ENEMY_SPEED_SCALE);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, vec2<float>{0.f, 1.f});
 
@@ -60,11 +60,11 @@ EntityId initializeEnemy2(vec2<float> start_position, EntityId player) {
     Reg.emplace<cmp::TriangleSprite>(Enemy, Triangle(vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f)));
     Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 150 });
     Reg.emplace<cmp::Position>(Enemy, start_position);
-    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{});
+    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{}, ENEMY_MAX_SPEED, ENEMY_SPEED_SCALE);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, vec2<float>{0.f, 1.f});
 
-    Reg.emplace<cmp::Collision>(Enemy, 25.f);
+    Reg.emplace<cmp::Collision>(Enemy, 20.f);
 
     return Enemy;
 }
@@ -81,7 +81,7 @@ EntityId initializePlayer() {
     Reg.emplace<cmp::TriangleSprite>(Player, Triangle(vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f)));
     Reg.emplace <cmp::Color>(Player, cmp::Color{ 0, 255, 0 });
     Reg.emplace<cmp::Position>(Player, vec2<float>(SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f));
-    Reg.emplace<cmp::Velocity>(Player, vec2<float>{});
+    Reg.emplace<cmp::Velocity>(Player, vec2<float>{}, MAX_SPEED, SPEED_SCALE);
     Reg.emplace<cmp::Rotation>(Player, 0.f);
     Reg.emplace<cmp::Direction>(Player, vec2<float>{0.f, 1.f});
 

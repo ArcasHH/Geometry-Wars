@@ -13,13 +13,13 @@ constexpr  float  SPEED_SCALE = 1.f;//the coefficient of speed change when contr
 static_assert(SPEED_SCALE < MAX_SPEED * 1000.f);
 
 constexpr int START_HEALTH = 10;
-constexpr float REGENERATION_TIME = 1.f;
+constexpr float REGENERATION_TIME = 5.f;
 constexpr int START_DAMAGE = 1;
 constexpr float SHOCK_TIME = 0.5f;
 constexpr float PUSH_ENEMIES = 8.f; 
 
 //Ammo parametrs
-constexpr int AMMO_AMOUNT = 4;
+constexpr int AMMO_AMOUNT = 16;
 constexpr float BULLET_SPEED = 1.f;
 constexpr float AMMO_RELOAD = 0.1f;
 
