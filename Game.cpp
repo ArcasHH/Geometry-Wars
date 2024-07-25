@@ -60,11 +60,30 @@ EntityId initializeEnemy2(vec2<float> start_position, EntityId player) {
     Reg.emplace<cmp::TriangleSprite>(Enemy, Triangle(vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f)));
     Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 150 });
     Reg.emplace<cmp::Position>(Enemy, start_position);
-    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{}, ENEMY_MAX_SPEED, ENEMY_SPEED_SCALE);
+    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{}, ENEMY_MAX_SPEED * 1.5f, ENEMY_SPEED_SCALE * 1.5f);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, vec2<float>{0.f, 1.f});
 
     Reg.emplace<cmp::Collision>(Enemy, 20.f);
+
+    return Enemy;
+}
+EntityId initializeEnemy3(vec2<float> start_position, EntityId player) {
+    auto Enemy = Reg.create();
+    Reg.emplace<cmp::IsEnemy>(Enemy, player, 5);
+    Reg.emplace<cmp::IsActive>(Enemy, false);
+
+    Reg.emplace<cmp::Health>(Enemy, 15,15, true, 0.f, REGENERATION_TIME);
+    Reg.emplace<cmp::Damage>(Enemy, 4);
+
+    Reg.emplace<cmp::TriangleSprite>(Enemy, Triangle(vec2<float>(0.f, 60.f), vec2<float>(-30.f, -30.f), vec2<float>(30.f, -30.f)));
+    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 100, 0, 200 });
+    Reg.emplace<cmp::Position>(Enemy, start_position);
+    Reg.emplace<cmp::Velocity>(Enemy, vec2<float>{}, ENEMY_MAX_SPEED * 2.f, ENEMY_SPEED_SCALE * 2.f);
+    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
+    Reg.emplace<cmp::Direction>(Enemy, vec2<float>{0.f, 1.f});
+
+    Reg.emplace<cmp::Collision>(Enemy, 40.f);
 
     return Enemy;
 }
@@ -101,7 +120,7 @@ void initializeScenario() {
     auto Scenario = Reg.create();
     Reg.emplace<cmp::Progress>(Scenario, 0.f, 0);
     cmp::Enemies::EnemyStorage Enemies;
-    Enemies.reserve(2*ENEMY_AMOUNT);
+    Enemies.reserve(3*ENEMY_AMOUNT);
     for (int i = 0; i != ENEMY_AMOUNT; ++i) {
         float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
         float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
@@ -111,6 +130,11 @@ void initializeScenario() {
         float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
         float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
         Enemies.emplace_back(initializeEnemy2(vec2<float>(x_pos, y_pos), Player));
+    }
+    for (int i = 0; i != ENEMY_AMOUNT; ++i) {
+        float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+        float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+        Enemies.emplace_back(initializeEnemy3(vec2<float>(x_pos, y_pos), Player));
     }
  
     Reg.emplace<cmp::Enemies>(Scenario, std::move(Enemies));

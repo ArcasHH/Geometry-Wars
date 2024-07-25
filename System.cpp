@@ -95,7 +95,9 @@ void sys::turnTowards(EntityId ent_id, vec2<float> pos) {
 void sys::moveInDir(EntityId ent_id, float dt) {
     auto CDir = Reg.findComponentOrNull<cmp::Direction>(ent_id);
     auto CVel = Reg.findComponentOrNull<cmp::Velocity>(ent_id);
-    if (!CDir || !CDir || (CVel && (CVel->velocity).length() > CVel->max_speed))
+    if (!CDir || !CVel )
+        return;
+    if ((CVel->velocity).length() > CVel->max_speed)
         return;
     if (CVel->speed_scale > 0)
         CVel->velocity += CDir->direction * CVel->speed_scale * dt;
@@ -159,7 +161,7 @@ void sys::control(float dt) {
 }
 void sys::turnTowardsCursor() {
     auto PlayerEnt = Reg.getPlayer();
-    turnTowards(PlayerEnt, vec2<float>(get_cursor_x(), get_cursor_y()));
+    turnTowards(PlayerEnt, vec2<float>(static_cast<float>(get_cursor_x()), static_cast<float>(get_cursor_y())));
 }
 void sys::shoot(float dt) {
     auto PlayerEnt = Reg.getPlayer();
@@ -325,10 +327,15 @@ void sys::updateScenario(float dt) {
         if (CPlayerScore->curr_score <= ENEMY_AMOUNT / 2)
             continue;
         CPlayerScore->curr_score = 0;
-        for (int i = 0; i < CEnemies->enemy_store.size(); ++i) {
+        for (int i = 0; i < CEnemies->enemy_store.size()-ENEMY_AMOUNT; ++i) {
             EntityId Enemy = CEnemies->enemy_store[i];
             ActivatelEnemy(Enemy);
         }
+        if(Progress.curr_time > 10.f)
+            for (int i = ENEMY_AMOUNT-1; i < CEnemies->enemy_store.size() ; ++i) {
+                EntityId Enemy = CEnemies->enemy_store[i];
+                ActivatelEnemy(Enemy);
+            }
     }
 }
 void sys::ActivatelEnemy(EntityId enemy_id) {
