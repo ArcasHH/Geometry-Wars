@@ -185,7 +185,7 @@ struct Registry {
     template<typename T>
     T* findComponentOrNull(EntityId Ent) {
         auto& CmpMap = getMap<T>();
-        auto FindIt = CmpMap.find(Ent);
+        auto FindIt = CmpMap.find(Ent); // HERE!!!!!!!
         if (FindIt == CmpMap.end())
             return nullptr;
 

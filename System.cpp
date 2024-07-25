@@ -5,15 +5,17 @@
 void sys::act(float dt) { 
 
     transform(dt);
-
+    //upgate
     playerControl(dt);
     EnemyAI(dt);
+    //collisions:
+    checkPlayerEnemyCollide();
+    bulletCollideEnemy();
 
     updateHealth(dt);
     updateScenario(dt);
 
-    checkPlayerEnemyCollide();
-    bulletCollideEnemy();
+    
 }
 
 
@@ -53,6 +55,9 @@ void sys::outOfBounds() {
 
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
         auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+
+        if (!CActive)
+            continue;
 
         if (!CVel || !(CActive->is_active))
             continue;
@@ -107,6 +112,10 @@ void sys::moveInDir(EntityId ent_id, float dt) {
 bool sys::isEntitiesCollide(EntityId ent1_id, EntityId ent2_id) {
     auto CActive1 = Reg.findComponentOrNull<cmp::IsActive>(ent1_id);
     auto CActive2 = Reg.findComponentOrNull<cmp::IsActive>(ent2_id);
+
+    if (!CActive1 || !CActive2)
+        return false;
+
     if (!(CActive1->is_active) || !(CActive2->is_active))
         return false;
     auto CPos1 = Reg.findComponentOrNull<cmp::Position>(ent1_id);
@@ -152,6 +161,8 @@ void sys::control(float dt) {
     }
     if (is_mouse_button_pressed(0)) {
         auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(PlayerEnt);
+        if (!CShoot)
+            return;
         if (CShoot->can_shoot) {
             sys::shoot(dt);
             CShoot->reload_timer = AMMO_RELOAD;
@@ -343,13 +354,13 @@ void sys::ActivatelEnemy(EntityId enemy_id) {
     auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(enemy_id);
     auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(enemy_id);
 
-    if (CEnemyActive->is_active || !CEnemyHealth || !CEnemyPos)
+    if (!CEnemyActive || CEnemyActive->is_active || !CEnemyHealth || !CEnemyPos)
         return;
 
     CEnemyActive->is_active = true;
     CEnemyHealth->curr_health = CEnemyHealth->max_health;
-    float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
-    float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+    float x_pos = random(BOUND_WIDTH, BOUND_WIDTH + 50);
+    float y_pos = random(BOUND_WIDTH, BOUND_WIDTH + 50);
     CEnemyPos->position = vec2<float>(x_pos, y_pos);
 
 }
@@ -364,18 +375,17 @@ void sys::draw(BuffTy Buffer) {
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
 
-        if (!CPos || !CColor || !CActive->is_active)
+        if (!CPos || !CColor || !CActive || !CActive->is_active)
             continue;
 
         vec2<int> p(static_cast<int>(CPos->position.x), static_cast<int>(CPos->position.y));
         vec2<int> x = get_min_max(Tr.sprite.v1.x, Tr.sprite.v2.x, Tr.sprite.v3.x) + vec2<int>(p.x, p.x); // x = (x_min, x_max)
-
         vec2<int> y = get_min_max(Tr.sprite.v1.y, Tr.sprite.v2.y, Tr.sprite.v3.y) + vec2<int>(p.y, p.y); // y = (y_min, y_max)
 
         for (int j = y.x; j <= y.y; ++j) {
             for (int i = x.x; i <= x.y; ++i) {
                 if (point_in_triangle(vec2<int>(i, j) - p, Tr.sprite.v1 , Tr.sprite.v2 , Tr.sprite.v3 )) {
-                    if (i<0 || i > SCREEN_WIDTH || j < 0 || j > SCREEN_HEIGHT)
+                    if (i<0 || i >= SCREEN_WIDTH || j < 0 || j >= SCREEN_HEIGHT)
                         continue;//out of bounds
                     buffer[j][i] = CColor->data;
                 }
