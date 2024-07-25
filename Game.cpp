@@ -20,11 +20,10 @@
 EntityId initializeBullet() {
     auto Bullet = Reg.create();
     Reg.emplace<cmp::IsBullet>(Bullet);
-
     Reg.emplace<cmp::IsActive>(Bullet, false);
     Reg.emplace<cmp::Sprite>(Bullet, vec2<float>(0.f, 10.f), vec2<float>(-5.f, -5.f), vec2<float>(5.f, -5.f));
+    Reg.emplace <cmp::Color>(Bullet, cmp::Color{ 255, 255, 255 });
     Reg.emplace<cmp::Position>(Bullet, 0.f, 0.f);
-    Reg.emplace <Color>(Bullet, Color{ 255, 255, 255 });
     Reg.emplace<cmp::Velocity>(Bullet, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Bullet, 0.f);
     Reg.emplace<cmp::Direction>(Bullet, 0.f, 1.f);
@@ -36,13 +35,14 @@ EntityId initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::IsPlayer>(Player);
     Reg.emplace<cmp::IsActive>(Player, true);
+
     Reg.emplace<cmp::CanShoot>(Player, true, AMMO_RELOAD);
-    Reg.emplace<cmp::Health>(Player, 10);
-    Reg.emplace<cmp::Damage>(Player, 1);
+    Reg.emplace<cmp::Health>(Player, START_HEALTH, START_HEALTH, REGENERATION_TIME);
+    Reg.emplace<cmp::Damage>(Player, START_DAMAGE);
 
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace <cmp::Color>(Player, cmp::Color{ 0, 255, 0 });
     Reg.emplace<cmp::Position>(Player, SCREEN_WIDTH / 2.f, SCREEN_HEIGHT / 2.f);
-    Reg.emplace <Color>(Player, Color{ 0, 255, 0 });
     Reg.emplace<cmp::Velocity>(Player, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Player, 0.f);
     Reg.emplace<cmp::Direction>(Player, 0.f, 1.f);
@@ -60,12 +60,13 @@ void initializeEnemy(vec2<float> start_position, EntityId player) {
     auto Enemy = Reg.create();
     Reg.emplace<cmp::IsEnemy>(Enemy, player);
     Reg.emplace<cmp::IsActive>(Enemy, true);
-    Reg.emplace<cmp::Health>(Enemy, 1);
+
+    Reg.emplace<cmp::Health>(Enemy, 1,1,0.f);
     Reg.emplace<cmp::Damage>(Enemy, 1);
 
     Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 0 });
     Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
-    Reg.emplace <Color>(Enemy, Color{ 200, 0, 0 });
     Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
     Reg.emplace<cmp::Rotation>(Enemy, 0.f);
     Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
@@ -89,7 +90,7 @@ void act(float dt)
   if (is_key_pressed(VK_ESCAPE))
     schedule_quit_game();
 
-  sys::update(dt);
+  sys::update();
   sys::act(dt);
 
 }

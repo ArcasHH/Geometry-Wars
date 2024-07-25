@@ -4,19 +4,7 @@
 #include <cmath>
 #include "Constants.h"
 
-using BuffTy = decltype(buffer);
-union Color final {
-    struct {
-        unsigned char b;
-        unsigned char g;
-        unsigned char r;
-        unsigned char a;
-    };
-    uint32_t data;
-    Color() : data(0x000000ff) {}
-    Color(unsigned char R, unsigned char G, unsigned char B, unsigned char A = 255) : r{ R }, g{ G }, b{ B }, a{ A } { }
-    Color& operator=(const Color&) = default;
-};
+
 
 template< typename T >
 struct vec2 final {

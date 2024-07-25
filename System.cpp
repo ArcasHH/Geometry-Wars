@@ -6,12 +6,14 @@ void sys::act(float dt) { // moving, rotations
     turnTowards(dt);
     rotate();
     move(dt);
-    
-}
-void sys::update(float dt) {//changes the way for act depending on the situation
+    playerRegeneration(dt);
     control(dt);
+    ammoReload(dt);
+
+}
+void sys::update() {//changes the way for act depending on the situation
+    checkHealth();
     outOfBounds();
-    ammoReload(dt); 
     playerCollideEnemy();
     bulletCollideEnemy();
 }
@@ -20,7 +22,8 @@ void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
     for (auto&& [Ent, Vel] : View) {
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
-        if (!CPos)  
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+        if (!CPos || !CActive->is_active)  
             continue;
         (vec2<float>&)*CPos += (vec2<float>&)Vel;
         //for all entities that are not bullets, the velocity fades
@@ -77,13 +80,28 @@ void sys::outOfBounds() {
         }
     }
 }
+void sys::checkHealth() {
+    auto& View = Reg.view<cmp::Health>();
+    for (auto&& [Ent, CHealth] : View) {
+        if (CHealth.curr_health > 0)
+            continue;
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+        if (!CActive->is_active)
+            continue;
+        CActive->is_active = false;
+        auto CPlayer = Reg.findComponentOrNull<cmp::IsPlayer>(Ent);
+        if(CPlayer)
+            schedule_quit_game(); // here should be die screen
+    }
+}
 
 void sys::control(float dt) {
     auto& View = Reg.view<cmp::IsPlayer>();
     for (auto&& [Ent, _] : View) {  
         auto CSpeed = Reg.findComponentOrNull<cmp::Velocity>(Ent);
 
-        if (!CSpeed)  continue;
+        if (!CSpeed)  
+            continue;
         float scale_x = SPEED_SCALE * dt;
         float scale_y = SPEED_SCALE * dt;
         
@@ -158,12 +176,15 @@ void sys::bulletCollideEnemy() {
         for (auto&& [EnemyEnt, _] : View) {
             auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
             auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
-
-            if (!CEnemyActive->is_active || !CEnemyPos)
+            if (!CEnemyPos || !(CEnemyActive->is_active))
                 continue;
             if (((vec2<float>&) * CPos - (vec2<float>&) * CEnemyPos).sq_length() <= ENEMY_SQ_COLLIDE_DISTANCE) {
                 CActive->is_active = false;
-                 CEnemyActive->is_active = false;
+                auto CPlayerDamage = Reg.findComponentOrNull<cmp::Damage>(PlayerEnt);
+                auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(EnemyEnt);
+                if (!CPlayerDamage || !CEnemyHealth)
+                    continue;
+                CEnemyHealth->curr_health -= CPlayerDamage->damage;
             }
         }
     }
@@ -185,9 +206,48 @@ void sys::playerCollideEnemy() {
             continue;
         if (((vec2<float>&) * CPlayerPos - (vec2<float>&) * CEnemyPos).sq_length() <= SQ_COLLIDE_DISTANCE) {
             pushEnemy((vec2<float>&) * CEnemyVel);
+            auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
+            auto CEnemyDamage = Reg.findComponentOrNull<cmp::Damage>(EnemyEnt);
+            if (!CPlayerHealth || !CEnemyDamage)
+                continue;
+            playerHasDamage( CEnemyDamage->damage);
         }
     }
 }
+void sys::playerHasDamage(int damage) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
+    if (!CPlayerHealth)
+        return;
+    CPlayerHealth->curr_health -= damage;
+    updatePlayerColor();
+}
+
+void sys::playerRegeneration(float dt) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
+    if (!CPlayerHealth )
+        return;
+    if (CPlayerHealth->regeneration_time <= REGENERATION_TIME ||
+        (CPlayerHealth->curr_health >= CPlayerHealth->max_health)) {
+        CPlayerHealth->regeneration_time += dt;
+        return;
+    }   
+    CPlayerHealth->curr_health ++;
+    CPlayerHealth->regeneration_time = 0.f;
+    updatePlayerColor();
+}
+void sys::updatePlayerColor() {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
+    auto CPlayerColor = Reg.findComponentOrNull<cmp::Color>(PlayerEnt);
+    if (!CPlayerHealth || !CPlayerColor)
+        return;
+    unsigned char red = static_cast<unsigned char>(255 - 255 * CPlayerHealth->curr_health / CPlayerHealth->max_health);
+    CPlayerColor->r = red;
+    CPlayerColor->g = 255 - red;
+}
+
 void sys::pushEnemy(vec2<float>& enemy_speed) {
     enemy_speed *= (-PUSH_ENEMIES);
     if (enemy_speed.length() > 10 * ENEMY_MAX_SPEED)
@@ -249,7 +309,7 @@ void sys::draw(BuffTy Buffer) {
     auto& View = Reg.view<cmp::Sprite>();
 
     for (auto&& [Ent, Tr] : View) {
-        auto CColor = Reg.findComponentOrNull<Color>(Ent);
+        auto CColor = Reg.findComponentOrNull<cmp::Color>(Ent);
         auto CPos = Reg.findComponentOrNull<cmp::Position>(Ent);
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
 

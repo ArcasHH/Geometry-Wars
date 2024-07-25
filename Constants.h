@@ -14,6 +14,7 @@ static_assert(SPEED_SCALE < MAX_SPEED * 1000.f);
 constexpr  float  SQ_COLLIDE_DISTANCE = 500.f;
 
 constexpr int START_HEALTH = 10;
+constexpr float REGENERATION_TIME = 5.f;
 constexpr int START_DAMAGE = 1;
 constexpr float SHOCK_TIME = 0.5f;
 constexpr float PUSH_ENEMIES = 8.f; 

@@ -1,11 +1,12 @@
 #pragma once
 #include "Component.h"
 
-inline Registry<cmp::Sprite, Color,
+inline Registry<cmp::Sprite, cmp::Color,
     cmp::Position, cmp::Velocity, cmp::Rotation, cmp::Direction,
     cmp::IsPlayer, cmp::IsEnemy, cmp::IsBullet,cmp::IsActive,
     cmp::CanShoot, cmp::Ammo, cmp::Health, cmp::Damage > Reg;
 
+using BuffTy = decltype(buffer);
 
 namespace sys {
 
@@ -15,22 +16,25 @@ namespace sys {
     void move(float dt);
     void rotate();
     void turnTowards(float dt);
-
+    void playerRegeneration(float dt);
+    void control(float dt);
+    void ammoReload(float dt);
 
     //updating data
-    void update(float dt);
-
+    void update();
     void outOfBounds();
-    void control(float dt);
     void bulletCollideEnemy();
     void playerCollideEnemy();
-    void ammoReload(float dt);
     
+
     //support functions
     void shoot();
     void turnTowardsCursor();
     void turnTowardsPlayer(float dt);
     void pushEnemy(vec2<float>& enemy_speed);
+    void checkHealth();
+    void playerHasDamage(int damage);
+    void updatePlayerColor();
 
 
     //draw(buffer)

@@ -12,6 +12,30 @@ using EntityId = uint64_t;
 
 
 namespace cmp {
+
+    struct Sprite { // Triangle : three points formed by vectors from the point(0,0)
+        vec2<float> v1;
+        vec2<float> v2;
+        vec2<float> v3;
+    };
+    union Color {
+        struct {
+            unsigned char b;
+            unsigned char g;
+            unsigned char r;
+            unsigned char a;
+        };
+        uint32_t data;
+        Color() : data(0x000000ff) {}
+        Color(unsigned char R, unsigned char G, unsigned char B, unsigned char A = 255) : r{ R }, g{ G }, b{ B }, a{ A } { }
+        Color& operator=(const Color&) = default;
+        Color& operator+=(const Color& other) {
+            b = (b + other.b) % 255;
+            g = (g + other.g) % 255;
+            r = (r + other.r) % 255;
+            return *this;
+        }
+    };
     struct Position {
         float x;
         float y;
@@ -30,47 +54,46 @@ namespace cmp {
     struct Rotation {
         float phi;
     };
-    struct Sprite {
-        vec2<float> v1;
-        vec2<float> v2;
-        vec2<float> v3;
-    };
-
-    struct Direction {
+    
+    struct Direction { // the direction the object is looking at. If it can
         float dir_x;
         float dir_y;
         Direction(float dx, float dy) :dir_x{ dx }, dir_y{ dy } {}
         Direction(vec2<float> v) : Direction{ v.x, v.y } {}
         operator vec2<float>() { return { dir_x, dir_y }; }
     };
+
+    //defines the type of the object
     struct IsPlayer {};
     struct IsEnemy {
         EntityId player_id;
     };
     struct IsBullet {};
-    struct IsActive {
+
+
+    struct IsActive { // object can act
         bool is_active;
     };
+    struct Health {
+        int curr_health;
+        int max_health;
+        float regeneration_time;
+    };
+    struct Damage {
+        int damage;
+    };
+
+    // for shooting:
     struct CanShoot {
-        
         bool can_shoot;
         float timer;
     };
     struct Ammo {
         using AmmoStorage = std::vector<EntityId>;
         AmmoStorage ammo_store;
+        Ammo(AmmoStorage &&Storage ): ammo_store{std::move(Storage)}{}
+    };
 
-        Ammo(AmmoStorage &&Storage )
-            : ammo_store{std::move(Storage)}
-        {}
-    };
-    struct Health {
-        int health;
-    };
-    struct Damage {
-        int damage;
-    };
-    
 };
 
 
