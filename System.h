@@ -4,7 +4,8 @@
 inline Registry<cmp::Sprite, cmp::Color,
     cmp::Position, cmp::Velocity, cmp::Rotation, cmp::Direction,
     cmp::IsPlayer, cmp::IsEnemy, cmp::IsBullet,cmp::IsActive,
-    cmp::CanShoot, cmp::Ammo, cmp::Health, cmp::Damage > Reg;
+    cmp::CanShoot, cmp::Ammo, cmp::Health, cmp::Damage,
+    cmp::Progress, cmp::Enemies, cmp::DieCost, cmp::Score> Reg;
 
 using BuffTy = decltype(buffer);
 
@@ -19,6 +20,8 @@ namespace sys {
     void playerRegeneration(float dt);
     void control(float dt);
     void ammoReload(float dt);
+    void updateScenario(float dt);
+
 
     //updating data
     void update();
@@ -35,6 +38,8 @@ namespace sys {
     void checkHealth();
     void playerHasDamage(int damage);
     void updatePlayerColor();
+    void killEnemy(EntityId enemy_id);
+    void ActivatelEnemy(EntityId enemy_id);
 
 
     //draw(buffer)

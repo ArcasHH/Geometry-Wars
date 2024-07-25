@@ -9,7 +9,7 @@ void sys::act(float dt) { // moving, rotations
     playerRegeneration(dt);
     control(dt);
     ammoReload(dt);
-
+    updateScenario(dt);
 }
 void sys::update() {//changes the way for act depending on the situation
     checkHealth();
@@ -81,6 +81,7 @@ void sys::outOfBounds() {
     }
 }
 void sys::checkHealth() {
+    
     auto& View = Reg.view<cmp::Health>();
     for (auto&& [Ent, CHealth] : View) {
         if (CHealth.curr_health > 0)
@@ -89,10 +90,37 @@ void sys::checkHealth() {
         if (!CActive->is_active)
             continue;
         CActive->is_active = false;
+        auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(Ent);
+        if (CEnemy) {
+            killEnemy(Ent);
+        }
+
         auto CPlayer = Reg.findComponentOrNull<cmp::IsPlayer>(Ent);
         if(CPlayer)
             schedule_quit_game(); // here should be die screen
     }
+}
+void sys::killEnemy(EntityId enemy_id) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerScore = Reg.findComponentOrNull<cmp::Score>(PlayerEnt);
+    auto CEnemyCost = Reg.findComponentOrNull<cmp::DieCost>(enemy_id);
+    CPlayerScore->curr_score += CEnemyCost->cost;
+
+}
+void sys::ActivatelEnemy(EntityId enemy_id) {
+    auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(enemy_id);
+    auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(enemy_id);
+    auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(enemy_id);
+    
+    if (CEnemyActive->is_active || !CEnemyHealth || !CEnemyPos)
+        return;
+
+    CEnemyActive->is_active = true;
+    CEnemyHealth->curr_health = CEnemyHealth->max_health;
+    float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+    float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+    (vec2<float>&)* CEnemyPos = vec2<float>(x_pos, y_pos);
+
 }
 
 void sys::control(float dt) {
@@ -301,6 +329,34 @@ void sys::turnTowards(float dt) {
     sys::turnTowardsCursor();
     sys::turnTowardsPlayer(dt);
 }
+
+void sys::updateScenario(float dt) {
+    auto PlayerEnt = Reg.getPlayer();
+    auto& View = Reg.view<cmp::Progress>();
+    for (auto&& [ScenarioEnt, Progress] : View) {
+        auto CEnemies = Reg.findComponentOrNull<cmp::Enemies>(ScenarioEnt);
+        auto CPlayerScore = Reg.findComponentOrNull<cmp::Score>(PlayerEnt);
+        if (!CEnemies || !CPlayerScore)
+            continue;
+        Progress.curr_time += dt;
+        Progress.score = CPlayerScore->curr_score;
+        if (CPlayerScore->curr_score <= ENEMY_AMOUNT/2)
+            continue;
+        CPlayerScore->curr_score = 0;
+        for (int i = 0; i < CEnemies->enemy_store.size()-ENEMY_AMOUNT; ++i) {
+            EntityId Enemy = CEnemies->enemy_store[i];
+            ActivatelEnemy(Enemy);
+        }
+        if (Progress.curr_time > 10)
+            for (int i = 2*ENEMY_AMOUNT-1; i < CEnemies->enemy_store.size(); ++i) {
+                EntityId Enemy = CEnemies->enemy_store[i];
+                ActivatelEnemy(Enemy);// very slow
+            }
+    }
+}
+
+
+
 
 
 //draw(buffer)

@@ -82,6 +82,12 @@ namespace cmp {
     struct Damage {
         int damage;
     };
+    struct Score {
+        int curr_score;
+    };
+    struct DieCost {
+        int cost;
+    };
 
     // for shooting:
     struct CanShoot {
@@ -94,6 +100,16 @@ namespace cmp {
         Ammo(AmmoStorage &&Storage ): ammo_store{std::move(Storage)}{}
     };
 
+    //Scenario
+    struct Enemies {
+        using EnemyStorage = std::vector<EntityId>;
+        EnemyStorage enemy_store;
+        Enemies(EnemyStorage&& Storage) : enemy_store{ std::move(Storage) } {}
+    };
+    struct Progress {
+        float curr_time;
+        int score;
+    };
 };
 
 

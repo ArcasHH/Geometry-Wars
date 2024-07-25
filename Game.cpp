@@ -30,7 +30,57 @@ EntityId initializeBullet() {
 
     return Bullet;
 }
+EntityId initializeEnemy1(vec2<float> start_position, EntityId player) {
+    auto Enemy = Reg.create();
+    Reg.emplace<cmp::IsEnemy>(Enemy, player);
+    Reg.emplace<cmp::IsActive>(Enemy, true);
 
+    Reg.emplace<cmp::Health>(Enemy, 1, 1, 0.f);
+    Reg.emplace<cmp::Damage>(Enemy, 1);
+    Reg.emplace<cmp::DieCost>(Enemy, 1);
+
+    Reg.emplace<cmp::Sprite>(Enemy, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 0 });
+    Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
+    Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
+    Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
+    return Enemy;
+}
+EntityId initializeEnemy2(vec2<float> start_position, EntityId player) {
+    auto Enemy = Reg.create();
+    Reg.emplace<cmp::IsEnemy>(Enemy, player);
+    Reg.emplace<cmp::IsActive>(Enemy, false);
+
+    Reg.emplace<cmp::Health>(Enemy, 5, 5, 0.f);
+    Reg.emplace<cmp::Damage>(Enemy, 2);
+    Reg.emplace<cmp::DieCost>(Enemy, 3);
+
+    Reg.emplace<cmp::Sprite>(Enemy, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
+    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 255, 0, 150 });
+    Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
+    Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
+    Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
+    return Enemy;
+}
+EntityId initializeEnemy3(vec2<float> start_position, EntityId player) {
+    auto Enemy = Reg.create();
+    Reg.emplace<cmp::IsEnemy>(Enemy, player);
+    Reg.emplace<cmp::IsActive>(Enemy, false);
+
+    Reg.emplace<cmp::Health>(Enemy, 10, 10, 0.f);
+    Reg.emplace<cmp::Damage>(Enemy, 5);
+    Reg.emplace<cmp::DieCost>(Enemy, 10);
+
+    Reg.emplace<cmp::Sprite>(Enemy, vec2<float>(0.f, 60.f), vec2<float>(-30.f, -30.f), vec2<float>(30.f, -30.f));
+    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 100, 0, 200 });
+    Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
+    Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
+    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
+    Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
+    return Enemy;
+}
 EntityId initializePlayer() {
     auto Player = Reg.create();
     Reg.emplace<cmp::IsPlayer>(Player);
@@ -39,6 +89,7 @@ EntityId initializePlayer() {
     Reg.emplace<cmp::CanShoot>(Player, true, AMMO_RELOAD);
     Reg.emplace<cmp::Health>(Player, START_HEALTH, START_HEALTH, REGENERATION_TIME);
     Reg.emplace<cmp::Damage>(Player, START_DAMAGE);
+    Reg.emplace<cmp::Score>(Player, 0);
 
     Reg.emplace<cmp::Sprite>(Player, vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
     Reg.emplace <cmp::Color>(Player, cmp::Color{ 0, 255, 0 });
@@ -49,38 +100,43 @@ EntityId initializePlayer() {
 
     cmp::Ammo::AmmoStorage Ammo;
     Ammo.reserve(AMMO_AMOUNT);
-    for (int I = 0; I != AMMO_AMOUNT; ++I)
+    for (int i = 0; i != AMMO_AMOUNT; ++i)
         Ammo.emplace_back(initializeBullet());
     Reg.emplace<cmp::Ammo>(Player, std::move(Ammo));
 
     return Player;
 }
-
-void initializeEnemy(vec2<float> start_position, EntityId player) {
-    auto Enemy = Reg.create();
-    Reg.emplace<cmp::IsEnemy>(Enemy, player);
-    Reg.emplace<cmp::IsActive>(Enemy, true);
-
-    Reg.emplace<cmp::Health>(Enemy, 1,1,0.f);
-    Reg.emplace<cmp::Damage>(Enemy, 1);
-
-    Reg.emplace<cmp::Sprite>(Enemy,vec2<float>(0.f, 30.f), vec2<float>(-15.f, -15.f), vec2<float>(15.f, -15.f));
-    Reg.emplace <cmp::Color>(Enemy, cmp::Color{ 200, 0, 0 });
-    Reg.emplace<cmp::Position>(Enemy, start_position.x, start_position.y);
-    Reg.emplace<cmp::Velocity>(Enemy, 0.f, 0.f);
-    Reg.emplace<cmp::Rotation>(Enemy, 0.f);
-    Reg.emplace<cmp::Direction>(Enemy, 0.f, 1.f);
+void initializeScenario() {
+    auto Player = initializePlayer();
+    auto Scenario = Reg.create();
+    Reg.emplace<cmp::Progress>(Scenario, 0.f, 0);
+    cmp::Enemies::EnemyStorage Enemies;
+    Enemies.reserve(3*ENEMY_AMOUNT);
+    for (int i = 0; i != ENEMY_AMOUNT; ++i) {
+        float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+        float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+        Enemies.emplace_back(initializeEnemy1(vec2<float>(x_pos, y_pos), Player));
+    }
+    for (int i = 0; i != ENEMY_AMOUNT; ++i) {
+        float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+        float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+        Enemies.emplace_back(initializeEnemy2(vec2<float>(x_pos, y_pos), Player));
+    }
+    for (int i = 0; i != ENEMY_AMOUNT; ++i) {
+        float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+        float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+        Enemies.emplace_back(initializeEnemy3(vec2<float>(x_pos, y_pos), Player));
+    }
+    Reg.emplace<cmp::Enemies>(Scenario, std::move(Enemies));
 }
+
 
 
 
 // initialize game data in this function
 void initialize()
-{
-    auto Player = initializePlayer();
-    initializeEnemy(vec2<float>(100.f, 100.f), Player);
-    initializeEnemy(vec2<float>(500.f, 700.f), Player);
-    initializeEnemy(vec2<float>(700.f, 100.f), Player);
+{ 
+    initializeScenario();
 }
 
 // this function is called to update game data,

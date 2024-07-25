@@ -25,6 +25,7 @@ constexpr float BULLET_SPEED = 1.f;
 constexpr float AMMO_RELOAD = 0.1f;
 
 //Enemy parametrs
+constexpr int ENEMY_AMOUNT = 4;
 constexpr  float  ENEMY_MAX_SPEED = 0.5f;
 constexpr  float  ENEMY_SPEED_SCALE = 0.5f;//the coefficient of speed change. // must not exceed the value of MAX_SPEED * 1/dt
 static_assert(ENEMY_SPEED_SCALE < ENEMY_MAX_SPEED * 1000.f);
