@@ -2,22 +2,30 @@
 
 
 //act(dt)
-void sys::act(float dt) { // moving, rotations
+void sys::act(float dt) { 
+
+    transform(dt);
+
     turnTowards(dt);
-    rotate();
-    move(dt);
-    playerRegeneration(dt);
+
+    
+
     control(dt);
     ammoReload(dt);
+
+    updateHealth(dt);
     updateScenario(dt);
-}
-void sys::update() {//changes the way for act depending on the situation
-    checkHealth();
-    outOfBounds();
+
     playerCollideEnemy();
     bulletCollideEnemy();
 }
 
+//Transform system: needs componets as position, velocity and rotation (maybe union velocity and position to one component tranformComponent?)
+void sys::transform(float dt) {
+    rotate();
+    move(dt); 
+    outOfBounds();
+}
 void sys::move(float dt) {
     auto& View = Reg.view<cmp::Velocity>();
     for (auto&& [Ent, Vel] : View) {
@@ -32,17 +40,15 @@ void sys::move(float dt) {
             (vec2<float>&)Vel *= SPEED_FADE;
     }
 }
-
 void sys::rotate() {
     auto& View = Reg.view<cmp::Rotation>();
     for (auto&& [Ent, Angle] : View) {
-        auto CTr = Reg.findComponentOrNull<cmp::Sprite>(Ent);
+        auto CTr = Reg.findComponentOrNull<cmp::TriangleSprite>(Ent);
         if (!CTr)  continue;
-        rotateSprite(Angle.phi, CTr->v1, CTr->v2, CTr->v3);
+        CTr->sprite.rotate(Angle.phi);
         Angle.phi = 0.f;
     }
 }
-
 void sys::outOfBounds() {
     auto& View = Reg.view<cmp::Position>();
     for (auto&& [Ent, Pos] : View) {
@@ -53,24 +59,24 @@ void sys::outOfBounds() {
 
         if (!CVel || !(CActive->is_active))
             continue;
-        if (Pos.x < BOUND_WIDTH) {
-            CVel->dx = 0;
-            Pos.x = BOUND_WIDTH;
+        if (Pos.position.x < BOUND_WIDTH) {
+            CVel->velocity.x = 0;
+            Pos.position.x = BOUND_WIDTH;
             is_out = true;
         }
-        if (Pos.y < BOUND_WIDTH) {
-            CVel->dy = 0;
-            Pos.y = BOUND_WIDTH;
+        if (Pos.position.y < BOUND_WIDTH) {
+            CVel->velocity.y = 0;
+            Pos.position.y = BOUND_WIDTH;
             is_out = true;
         }
-        if (Pos.x > SCREEN_WIDTH - BOUND_WIDTH) {
-            CVel->dx = 0;
-            Pos.x = SCREEN_WIDTH - BOUND_WIDTH;
+        if (Pos.position.x > SCREEN_WIDTH - BOUND_WIDTH) {
+            CVel->velocity.x = 0;
+            Pos.position.x = SCREEN_WIDTH - BOUND_WIDTH;
             is_out = true;
         }
-        if (Pos.y > SCREEN_HEIGHT - BOUND_WIDTH) {
-            CVel->dy = 0;
-            Pos.y = SCREEN_HEIGHT - BOUND_WIDTH;
+        if (Pos.position.y > SCREEN_HEIGHT - BOUND_WIDTH) {
+            CVel->velocity.y = 0;
+            Pos.position.y = SCREEN_HEIGHT - BOUND_WIDTH;
             is_out = true;
         }
         //if the bullet has reached the border, then it returns to the ammo storage
@@ -80,82 +86,45 @@ void sys::outOfBounds() {
         }
     }
 }
-void sys::checkHealth() {
-    
-    auto& View = Reg.view<cmp::Health>();
-    for (auto&& [Ent, CHealth] : View) {
-        if (CHealth.curr_health > 0)
-            continue;
-        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
-        if (!CActive->is_active)
-            continue;
-        CActive->is_active = false;
-        auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(Ent);
-        if (CEnemy) {
-            killEnemy(Ent);
-        }
 
-        auto CPlayer = Reg.findComponentOrNull<cmp::IsPlayer>(Ent);
-        if(CPlayer)
-            schedule_quit_game(); // here should be die screen
-    }
-}
+
+
 void sys::killEnemy(EntityId enemy_id) {
     auto PlayerEnt = Reg.getPlayer();
-    auto CPlayerScore = Reg.findComponentOrNull<cmp::Score>(PlayerEnt);
-    auto CEnemyCost = Reg.findComponentOrNull<cmp::DieCost>(enemy_id);
-    CPlayerScore->curr_score += CEnemyCost->cost;
-
-}
-void sys::ActivatelEnemy(EntityId enemy_id) {
-    auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(enemy_id);
-    auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(enemy_id);
-    auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(enemy_id);
-    
-    if (CEnemyActive->is_active || !CEnemyHealth || !CEnemyPos)
-        return;
-
-    CEnemyActive->is_active = true;
-    CEnemyHealth->curr_health = CEnemyHealth->max_health;
-    float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
-    float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
-    (vec2<float>&)* CEnemyPos = vec2<float>(x_pos, y_pos);
+    auto CScore = Reg.findComponentOrNull<cmp::IsPlayer>(PlayerEnt);
+    auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(enemy_id);
+    CScore->curr_score += CEnemy->cost;
 
 }
 
 void sys::control(float dt) {
     auto& View = Reg.view<cmp::IsPlayer>();
     for (auto&& [Ent, _] : View) {  
-        auto CSpeed = Reg.findComponentOrNull<cmp::Velocity>(Ent);
-
-        if (!CSpeed)  
+        auto CVel = Reg.findComponentOrNull<cmp::Velocity>(Ent);
+        if (!CVel)
             continue;
-        float scale_x = SPEED_SCALE * dt;
-        float scale_y = SPEED_SCALE * dt;
-        
-    
+        float scale = SPEED_SCALE * dt;
         if (is_key_pressed('D')) {
-            if (CSpeed->dx <= MAX_SPEED)
-                CSpeed->dx += scale_x;
+            if (CVel->velocity.x <= MAX_SPEED)
+                CVel->velocity.x += scale;
         }
         if (is_key_pressed('A')) {
-            if (CSpeed->dx >= -MAX_SPEED)
-                CSpeed->dx -= scale_x;
+            if (CVel->velocity.x >= -MAX_SPEED)
+                CVel->velocity.x -= scale;
         }
         if (is_key_pressed('S')) {
-            if (CSpeed->dy <= MAX_SPEED)
-                CSpeed->dy += scale_y;
+            if (CVel->velocity.y <= MAX_SPEED)
+                CVel->velocity.y += scale;
         }
         if (is_key_pressed('W')) {
-            if (CSpeed->dy >= -MAX_SPEED)
-                CSpeed->dy -= scale_y;
+            if (CVel->velocity.y >= -MAX_SPEED)
+                CVel->velocity.y -= scale;
         }
-        
         if (is_mouse_button_pressed(0)) {
             auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(Ent);
             if (CShoot->can_shoot) {
                 sys::shoot();
-                CShoot->timer = AMMO_RELOAD;
+                CShoot->reload_timer = AMMO_RELOAD;
                 CShoot->can_shoot = false;
             }   
         }
@@ -227,7 +196,6 @@ void sys::playerCollideEnemy() {
     for (auto&& [EnemyEnt, _] : View) {
         auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
         auto CEnemyVel = Reg.findComponentOrNull<cmp::Velocity>(EnemyEnt);
-
         auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
 
         if (!CEnemyActive->is_active || !CEnemyPos)
@@ -238,42 +206,10 @@ void sys::playerCollideEnemy() {
             auto CEnemyDamage = Reg.findComponentOrNull<cmp::Damage>(EnemyEnt);
             if (!CPlayerHealth || !CEnemyDamage)
                 continue;
-            playerHasDamage( CEnemyDamage->damage);
+            CPlayerHealth->curr_health -= CEnemyDamage->damage;
+           
         }
     }
-}
-void sys::playerHasDamage(int damage) {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
-    if (!CPlayerHealth)
-        return;
-    CPlayerHealth->curr_health -= damage;
-    updatePlayerColor();
-}
-
-void sys::playerRegeneration(float dt) {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
-    if (!CPlayerHealth )
-        return;
-    if (CPlayerHealth->regeneration_time <= REGENERATION_TIME ||
-        (CPlayerHealth->curr_health >= CPlayerHealth->max_health)) {
-        CPlayerHealth->regeneration_time += dt;
-        return;
-    }   
-    CPlayerHealth->curr_health ++;
-    CPlayerHealth->regeneration_time = 0.f;
-    updatePlayerColor();
-}
-void sys::updatePlayerColor() {
-    auto PlayerEnt = Reg.getPlayer();
-    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
-    auto CPlayerColor = Reg.findComponentOrNull<cmp::Color>(PlayerEnt);
-    if (!CPlayerHealth || !CPlayerColor)
-        return;
-    unsigned char red = static_cast<unsigned char>(255 - 255 * CPlayerHealth->curr_health / CPlayerHealth->max_health);
-    CPlayerColor->r = red;
-    CPlayerColor->g = 255 - red;
 }
 
 void sys::pushEnemy(vec2<float>& enemy_speed) {
@@ -285,11 +221,11 @@ void sys::pushEnemy(vec2<float>& enemy_speed) {
 void sys::ammoReload(float dt) {
     auto PlayerEnt = Reg.getPlayer();
     auto CShoot = Reg.findComponentOrNull<cmp::CanShoot>(PlayerEnt);
-    if (CShoot->timer < FLOAT_PRECISE) {
+    if (CShoot->reload_timer < FLOAT_PRECISE) {
         CShoot->can_shoot = true;
     }
     else {
-        CShoot->timer-=dt;
+        CShoot->reload_timer -=dt;
     }
 }
 
@@ -301,7 +237,7 @@ void sys::turnTowardsCursor() {
         auto CDir = Reg.findComponentOrNull<cmp::Direction>(Ent);
         if (!CRot || !CPos || !CDir)
             continue;
-        vec2<float> NewDir(get_cursor_x() - CPos->x, get_cursor_y() - CPos->y);
+        vec2<float> NewDir(get_cursor_x() - CPos->position.x, get_cursor_y() - CPos->position.y);
         CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
         rotateVector(CRot->phi, (vec2<float>&)*CDir);
     }
@@ -330,39 +266,98 @@ void sys::turnTowards(float dt) {
     sys::turnTowardsPlayer(dt);
 }
 
+
+
+// Health system
+void sys::updateHealth(float dt) {
+    checkHealth();
+    Regeneration(dt);
+    diaplayPlayerHealth();
+}
+void sys::checkHealth() {
+    auto& View = Reg.view<cmp::Health>();
+    for (auto&& [Ent, CHealth] : View) {
+        auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
+
+        if (!CActive->is_active || CHealth.curr_health > 0)
+            continue;
+        CActive->is_active = false;
+        auto CEnemy = Reg.findComponentOrNull<cmp::IsEnemy>(Ent);
+        if (CEnemy) {
+            killEnemy(Ent); // enemy health <= 0
+        }
+        auto CPlayer = Reg.findComponentOrNull<cmp::IsPlayer>(Ent);
+        if (CPlayer)
+            schedule_quit_game(); // here should be die screen
+    }
+}
+void sys::Regeneration(float dt) {
+    auto& View = Reg.view<cmp::Health>();
+    for (auto&& [Ent, CHealth] : View) {
+        if (!(CHealth.can_regenerate) || (CHealth.curr_health >= CHealth.max_health))
+            continue;
+        if (CHealth.curr_regeneration_time < CHealth.regeneration_time) {
+            CHealth.curr_regeneration_time += dt;
+            continue;
+        }
+        CHealth.curr_health++;
+        CHealth.curr_regeneration_time = 0.f;
+    }
+}
+void sys::diaplayPlayerHealth() {
+    auto PlayerEnt = Reg.getPlayer();
+    auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
+    auto CPlayerColor = Reg.findComponentOrNull<cmp::Color>(PlayerEnt);
+    if ((CPlayerHealth->curr_health >= CPlayerHealth->max_health) || !CPlayerColor)
+        return;
+    unsigned char red = static_cast<unsigned char>(255 - 255 * CPlayerHealth->curr_health / CPlayerHealth->max_health);
+    CPlayerColor->r = red;
+    CPlayerColor->g = 255 - red;
+}
+
+
+// Scenario
 void sys::updateScenario(float dt) {
     auto PlayerEnt = Reg.getPlayer();
     auto& View = Reg.view<cmp::Progress>();
     for (auto&& [ScenarioEnt, Progress] : View) {
         auto CEnemies = Reg.findComponentOrNull<cmp::Enemies>(ScenarioEnt);
-        auto CPlayerScore = Reg.findComponentOrNull<cmp::Score>(PlayerEnt);
+        auto CPlayerScore = Reg.findComponentOrNull<cmp::IsPlayer>(PlayerEnt);
         if (!CEnemies || !CPlayerScore)
             continue;
         Progress.curr_time += dt;
         Progress.score = CPlayerScore->curr_score;
-        if (CPlayerScore->curr_score <= ENEMY_AMOUNT/2)
+        if (CPlayerScore->curr_score <= ENEMY_AMOUNT / 2)
             continue;
         CPlayerScore->curr_score = 0;
-        for (int i = 0; i < CEnemies->enemy_store.size()-ENEMY_AMOUNT; ++i) {
+        for (int i = 0; i < CEnemies->enemy_store.size() - ENEMY_AMOUNT; ++i) {
             EntityId Enemy = CEnemies->enemy_store[i];
             ActivatelEnemy(Enemy);
         }
-        if (Progress.curr_time > 10)
-            for (int i = 2*ENEMY_AMOUNT-1; i < CEnemies->enemy_store.size(); ++i) {
-                EntityId Enemy = CEnemies->enemy_store[i];
-                ActivatelEnemy(Enemy);// very slow
-            }
+
+
     }
 }
+void sys::ActivatelEnemy(EntityId enemy_id) {
+    auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(enemy_id);
+    auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(enemy_id);
+    auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(enemy_id);
 
+    if (CEnemyActive->is_active || !CEnemyHealth || !CEnemyPos)
+        return;
 
+    CEnemyActive->is_active = true;
+    CEnemyHealth->curr_health = CEnemyHealth->max_health;
+    float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
+    float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
+    (vec2<float>&)* CEnemyPos = vec2<float>(x_pos, y_pos);
 
-
+}
 
 //draw(buffer)
 void sys::draw(BuffTy Buffer) {
 
-    auto& View = Reg.view<cmp::Sprite>();
+    auto& View = Reg.view<cmp::TriangleSprite>();
 
     for (auto&& [Ent, Tr] : View) {
         auto CColor = Reg.findComponentOrNull<cmp::Color>(Ent);
@@ -372,13 +367,14 @@ void sys::draw(BuffTy Buffer) {
         if (!CPos || !CColor || !CActive->is_active)
             continue;
 
-        vec2<int> p(static_cast<int>(CPos->x), static_cast<int>(CPos->y));
-        vec2<int> y = get_min_max(Tr.v1.y, Tr.v2.y, Tr.v3.y) + vec2<int>(p.y, p.y); // y = (y_min, y_max)
-        vec2<int> x = get_min_max(Tr.v1.x, Tr.v2.x, Tr.v3.x) + vec2<int>(p.x, p.x); // x = (x_min, x_max)
+        vec2<int> p(static_cast<int>(CPos->position.x), static_cast<int>(CPos->position.y));
+        vec2<int> x = get_min_max(Tr.sprite.v1.x, Tr.sprite.v2.x, Tr.sprite.v3.x) + vec2<int>(p.x, p.x); // x = (x_min, x_max)
+
+        vec2<int> y = get_min_max(Tr.sprite.v1.y, Tr.sprite.v2.y, Tr.sprite.v3.y) + vec2<int>(p.y, p.y); // y = (y_min, y_max)
 
         for (int j = y.x; j <= y.y; ++j) {
             for (int i = x.x; i <= x.y; ++i) {
-                if (point_in_triangle(vec2<int>(i, j), Tr.v1 + *CPos, Tr.v2 + *CPos, Tr.v3 + *CPos)) {
+                if (point_in_triangle(vec2<int>(i, j) - p, Tr.sprite.v1 , Tr.sprite.v2 , Tr.sprite.v3 )) {
                     if (i<0 || i > SCREEN_WIDTH || j < 0 || j > SCREEN_HEIGHT)
                         continue;//out of bounds
                     buffer[j][i] = CColor->data;

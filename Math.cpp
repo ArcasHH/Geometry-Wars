@@ -33,7 +33,12 @@ void rotateVector(float phi, vec2<float>& v) {
     Matrix m(phi);
     v = m * v;
 }
-
+void Triangle::rotate(float phi) {
+    Matrix m(phi);
+    v1 = m * v1;
+    v2 = m * v2;
+    v3 = m * v3;
+}
 
 vec2<int> get_min_max(float a, float b, float c) {
     float max = a, min = a;

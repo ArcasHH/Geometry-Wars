@@ -13,10 +13,8 @@ using EntityId = uint64_t;
 
 namespace cmp {
 
-    struct Sprite { // Triangle : three points formed by vectors from the point(0,0)
-        vec2<float> v1;
-        vec2<float> v2;
-        vec2<float> v3;
+    struct TriangleSprite { // Triangle : three points formed by vectors from the point(0,0)
+        Triangle sprite;
     };
     union Color {
         struct {
@@ -36,63 +34,55 @@ namespace cmp {
             return *this;
         }
     };
-    struct Position {
-        float x;
-        float y;
 
-        Position(float x, float y) :x{ x }, y{ y } {}
-        Position(vec2<float> v) : Position{ v.x, v.y } {}
-        operator vec2<float>() { return { x, y }; }
+    //Transform components:
+    struct Position {
+        vec2<float> position; // r-vector from (0,0)
     };
     struct Velocity {
-        float dx;
-        float dy;
-        Velocity(float dx, float dy) :dx{ dx }, dy{ dy } {}
-        Velocity(vec2<float> v) : Velocity{ v.x, v.y } {}
-        operator vec2<float>() { return { dx, dy }; }
+        vec2<float> velocity;
     };
     struct Rotation {
         float phi;
     };
     
     struct Direction { // the direction the object is looking at. If it can
-        float dir_x;
-        float dir_y;
-        Direction(float dx, float dy) :dir_x{ dx }, dir_y{ dy } {}
-        Direction(vec2<float> v) : Direction{ v.x, v.y } {}
-        operator vec2<float>() { return { dir_x, dir_y }; }
+        vec2<float> direction;
     };
 
     //defines the type of the object
-    struct IsPlayer {};
+    struct IsPlayer {
+        int curr_score;
+    };
     struct IsEnemy {
         EntityId player_id;
+        int cost; // score += cost while kill enemy
     };
     struct IsBullet {};
 
 
-    struct IsActive { // object can act
+    struct IsActive { // object can act (not static)
         bool is_active;
     };
+
     struct Health {
         int curr_health;
         int max_health;
+        bool can_regenerate;
+        float curr_regeneration_time;
         float regeneration_time;
     };
     struct Damage {
         int damage;
     };
-    struct Score {
-        int curr_score;
-    };
-    struct DieCost {
-        int cost;
-    };
+
+
 
     // for shooting:
     struct CanShoot {
-        bool can_shoot;
-        float timer;
+        bool can_shoot; 
+        float reload_timer;
+        bool is_shoot{ false };
     };
     struct Ammo {
         using AmmoStorage = std::vector<EntityId>;
