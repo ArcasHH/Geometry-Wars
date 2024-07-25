@@ -318,9 +318,10 @@ void sys::updateScenario(float dt) {
             continue;
         Progress.curr_time += dt;
         Progress.score = PScore->curr_score;
-        if (PScore->curr_score <= ENEMY_AMOUNT / 2)
+        Progress.timer_before_act -= dt;
+        if (PScore->curr_score <= ENEMY_AMOUNT / 2 || Progress.timer_before_act > FLOAT_PRECISE)
             continue;
-        PScore->curr_score = 0;
+        Progress.timer_before_act = 1.f;
         for (int i = 0; i < CEnemies->enemy_store.size()-ENEMY_AMOUNT; ++i) {
             EntityId Enemy = CEnemies->enemy_store[i];
             ActivatelEnemy(Enemy);
@@ -345,7 +346,7 @@ void sys::ActivatelEnemy(EntityId enemy_id) {
     float x_pos = random(BOUND_WIDTH, BOUND_WIDTH + 50);
     float y_pos = random(BOUND_WIDTH, BOUND_WIDTH + 50);
     CEnemyPos->position = vec2<float>(x_pos, y_pos);
-
+    turnTowards(enemy_id, CEnemyPos->position + vec2<float>(0.f, 1.f));
 }
 
 //draw(buffer)

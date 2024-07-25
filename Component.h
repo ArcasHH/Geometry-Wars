@@ -66,6 +66,7 @@ namespace cmp {
 
     struct IsActive { // object can act (not static)
         bool is_active;
+        
     };
 
     struct Health {
@@ -104,8 +105,9 @@ namespace cmp {
         Enemies(EnemyStorage&& Storage) : enemy_store{ std::move(Storage) } {}
     };
     struct Progress {
-        float curr_time;
         int score;
+        float curr_time;
+        float timer_before_act{ 1.f };
     };
 };
 

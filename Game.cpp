@@ -118,7 +118,7 @@ EntityId initializePlayer() {
 void initializeScenario() {
     auto Player = initializePlayer();
     auto Scenario = Reg.create();
-    Reg.emplace<cmp::Progress>(Scenario, 0.f, 0);
+    Reg.emplace<cmp::Progress>(Scenario, 0, 0.f);
     cmp::Enemies::EnemyStorage Enemies;
     Enemies.reserve(3*ENEMY_AMOUNT);
     for (int i = 0; i != ENEMY_AMOUNT; ++i) {
