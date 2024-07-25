@@ -114,11 +114,6 @@ struct Triangle {
     Triangle(vec2<float> v1, vec2<float> v2, vec2<float> v3) : v1{ v1 }, v2{ v2 }, v3{ v3 } {}
     void rotate(float phi);
 };
-struct Circle {
-    float radius;
-    Circle() = default;
-    Circle(float radius) : radius{ radius } {}
-};
 
 float angle_between(const vec2<float>& a, const vec2<float>& b);
 vec2<int> get_min_max(float a, float b, float c);

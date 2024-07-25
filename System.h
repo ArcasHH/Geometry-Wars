@@ -1,7 +1,7 @@
 #pragma once
 #include "Component.h"
 
-inline Registry<cmp::TriangleSprite, cmp::Color,
+inline Registry<cmp::TriangleSprite, cmp::Color, cmp::Collision,
     cmp::Position, cmp::Velocity, cmp::Rotation, cmp::Direction,
     cmp::IsPlayer, cmp::IsEnemy, cmp::IsBullet,cmp::IsActive,
     cmp::CanShoot, cmp::Ammo, cmp::Health, cmp::Damage,
@@ -16,9 +16,14 @@ namespace sys {
 
     
     void turnTowards(float dt);
-    //player ai
-    void control(float dt);
-    void turnTowardsCursor();
+
+    //player act
+    void control(float dt); //Обработка нажатий
+    void turnTowardsCursor(); // Всегда смотрит в направлении курсора
+    //Player->bullets  --- shooting
+    void ammoReload(float dt);
+    void shoot();
+
     //enemy ai
     void EnemyAI(float dt);
     void turnTowardsPlayer(float dt);
@@ -29,14 +34,14 @@ namespace sys {
     void rotate();
     void outOfBounds();
     
-    // Three type collisions of entities:
+    
     // 
-    //Player->bullets  --- shooting
-    void ammoReload(float dt);
-    void shoot();
+    
+    // Three type collisions of entities:
     //Bullets->enemy --- hitt  enemy
     void bulletCollideEnemy();
     //Enemy->player --- enemy damage player
+    void PlayerEnemyCollide();
     void playerCollideEnemy();
     void pushEnemy(vec2<float>& enemy_speed);
     void killEnemy(EntityId enemy_id); //player get score++

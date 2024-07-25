@@ -33,11 +33,11 @@ void sys::move(float dt) {
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(Ent);
         if (!CPos || !CActive->is_active)  
             continue;
-        (vec2<float>&)*CPos += (vec2<float>&)Vel;
+        CPos->position += Vel.velocity;
         //for all entities that are not bullets, the velocity fades
         auto CBullet = Reg.findComponentOrNull<cmp::IsBullet>(Ent);
         if (!CBullet)
-            (vec2<float>&)Vel *= SPEED_FADE;
+            Vel.velocity *= SPEED_FADE;
     }
 }
 void sys::rotate() {
@@ -150,11 +150,11 @@ void sys::shoot() {
         if (!CPos || !CVel || !CDir || !CRot )
             continue;
         //turn towards the direction of the player
-        (vec2<float>&)* CPos = (vec2<float>&) * CPlayerPos;
-        CRot->phi = angle_between((vec2<float>&) * CDir, (vec2<float>&) * CPlayerDir);
-        (vec2<float>&)* CDir = (vec2<float>&) * CPlayerDir;
+        CPos->position = CPlayerPos->position;
+        CRot->phi = angle_between( CDir->direction,  CPlayerDir->direction);
+        CDir->direction = CPlayerDir->direction;
         //Speed Update
-        (vec2<float>&)* CVel = (vec2<float>&) * CDir * BULLET_SPEED;
+        CVel->velocity =  CDir->direction * BULLET_SPEED;
         break;
     }
 }
@@ -166,16 +166,22 @@ void sys::bulletCollideEnemy() {
         EntityId BulletEnt = CAmmo->ammo_store[i];
         auto CActive = Reg.findComponentOrNull<cmp::IsActive>(BulletEnt);
         auto CPos = Reg.findComponentOrNull<cmp::Position>(BulletEnt);
-        if (!CActive->is_active || !CActive || !CPos)
+        auto CColl = Reg.findComponentOrNull<cmp::Collision>(BulletEnt);
+
+        if (!CActive->is_active || !CActive || !CPos || !CColl)
             continue;
 
         auto& View = Reg.view<cmp::IsEnemy>();
         for (auto&& [EnemyEnt, _] : View) {
             auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
             auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
-            if (!CEnemyPos || !(CEnemyActive->is_active))
+            auto CEnemyColl = Reg.findComponentOrNull<cmp::Collision>(EnemyEnt);
+
+            if (!CEnemyPos || !(CEnemyActive->is_active) || !CEnemyColl)
                 continue;
-            if (((vec2<float>&) * CPos - (vec2<float>&) * CEnemyPos).sq_length() <= ENEMY_SQ_COLLIDE_DISTANCE) {
+            if ((CPos->position - CEnemyPos->position).sq_length() <= 
+                (CColl->collide_distance + CEnemyColl->collide_distance)* (CColl->collide_distance + CEnemyColl->collide_distance)  ) {
+                
                 CActive->is_active = false;
                 auto CPlayerDamage = Reg.findComponentOrNull<cmp::Damage>(PlayerEnt);
                 auto CEnemyHealth = Reg.findComponentOrNull<cmp::Health>(EnemyEnt);
@@ -190,24 +196,26 @@ void sys::bulletCollideEnemy() {
 void sys::playerCollideEnemy() {
     auto PlayerEnt = Reg.getPlayer();
     auto CPlayerPos = Reg.findComponentOrNull<cmp::Position>(PlayerEnt);
-    auto CPlayerVel = Reg.findComponentOrNull<cmp::Velocity>(PlayerEnt);
+    auto CPlayerColl = Reg.findComponentOrNull<cmp::Collision>(PlayerEnt);
 
     auto& View = Reg.view<cmp::IsEnemy>();
     for (auto&& [EnemyEnt, _] : View) {
         auto CEnemyPos = Reg.findComponentOrNull<cmp::Position>(EnemyEnt);
+        auto CEnemyColl = Reg.findComponentOrNull<cmp::Collision>(EnemyEnt);
         auto CEnemyVel = Reg.findComponentOrNull<cmp::Velocity>(EnemyEnt);
+
         auto CEnemyActive = Reg.findComponentOrNull<cmp::IsActive>(EnemyEnt);
 
-        if (!CEnemyActive->is_active || !CEnemyPos)
+        if (!CEnemyActive->is_active || !CEnemyPos || !CEnemyColl)
             continue;
-        if (((vec2<float>&) * CPlayerPos - (vec2<float>&) * CEnemyPos).sq_length() <= SQ_COLLIDE_DISTANCE) {
-            pushEnemy((vec2<float>&) * CEnemyVel);
+        if ((CPlayerPos->position - CEnemyPos->position).sq_length() <= 
+            (CPlayerColl->collide_distance+CEnemyColl->collide_distance)* (CPlayerColl->collide_distance + CEnemyColl->collide_distance)) {
+            pushEnemy(CEnemyVel->velocity);
             auto CPlayerHealth = Reg.findComponentOrNull<cmp::Health>(PlayerEnt);
             auto CEnemyDamage = Reg.findComponentOrNull<cmp::Damage>(EnemyEnt);
             if (!CPlayerHealth || !CEnemyDamage)
                 continue;
             CPlayerHealth->curr_health -= CEnemyDamage->damage;
-           
         }
     }
 }
@@ -238,8 +246,8 @@ void sys::turnTowardsCursor() {
         if (!CRot || !CPos || !CDir)
             continue;
         vec2<float> NewDir(get_cursor_x() - CPos->position.x, get_cursor_y() - CPos->position.y);
-        CRot->phi = angle_between((vec2<float>&)*CDir, NewDir);
-        rotateVector(CRot->phi, (vec2<float>&)*CDir);
+        CRot->phi = angle_between(CDir->direction, NewDir);
+        rotateVector(CRot->phi, CDir->direction);
     }
 }
 void sys::turnTowardsPlayer(float dt) {
@@ -252,12 +260,12 @@ void sys::turnTowardsPlayer(float dt) {
 
         if (!CRot || !CPos || !CDir || !CPlayerPos)
             continue;
-        CRot->phi = angle_between((vec2<float>&)*CDir, (vec2<float>&)*CPlayerPos - (vec2<float>&)*CPos);
-        rotateVector(CRot->phi, (vec2<float>&)*CDir);
+        CRot->phi = angle_between(CDir->direction, CPlayerPos->position - CPos->position);
+        rotateVector(CRot->phi, CDir->direction);
         //Speed Update
         auto CVel = Reg.findComponentOrNull<cmp::Velocity>(EnemyEnt);
-        if (CVel && ((vec2<float>&) * CVel).length() < ENEMY_MAX_SPEED) {
-            (vec2<float>&)* CVel += (vec2<float>&) * CDir * ENEMY_SPEED_SCALE * dt;
+        if (CVel && (CVel->velocity).length() < ENEMY_MAX_SPEED) {
+            CVel->velocity += CDir->direction * ENEMY_SPEED_SCALE * dt;
         }
     }
 }
@@ -334,8 +342,6 @@ void sys::updateScenario(float dt) {
             EntityId Enemy = CEnemies->enemy_store[i];
             ActivatelEnemy(Enemy);
         }
-
-
     }
 }
 void sys::ActivatelEnemy(EntityId enemy_id) {
@@ -350,7 +356,7 @@ void sys::ActivatelEnemy(EntityId enemy_id) {
     CEnemyHealth->curr_health = CEnemyHealth->max_health;
     float x_pos = random(BOUND_WIDTH, SCREEN_WIDTH - BOUND_WIDTH);
     float y_pos = random(BOUND_WIDTH, SCREEN_HEIGHT - BOUND_WIDTH);
-    (vec2<float>&)* CEnemyPos = vec2<float>(x_pos, y_pos);
+    CEnemyPos->position = vec2<float>(x_pos, y_pos);
 
 }
 

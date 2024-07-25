@@ -76,6 +76,9 @@ namespace cmp {
         int damage;
     };
 
+    struct Collision {
+        float collide_distance;
+    };
 
 
     // for shooting:
