@@ -33,7 +33,7 @@ void sys::move(float dt) {
             continue;
 
         auto CPos = Reg.findComponent<cmp::Position>(Ent);
-        CPos->position += Vel.velocity;
+        CPos->position += Vel.velocity * dt;
         //for all entities that are not bullets, the velocity fades
         auto CBullet = Reg.findComponentOrNull<cmp::IsBullet>(Ent);
         if (!CBullet)
@@ -98,7 +98,7 @@ void sys::moveInDir(EntityId ent_id, float dt) {
     if ((CVel->velocity).length() > CVel->max_speed)
         return;
     if (CVel->speed_scale > 0)
-        CVel->velocity += CDir->direction * CVel->speed_scale * dt;
+        CVel->velocity += CDir->direction * (CVel->speed_scale * dt);
     else
         CVel->velocity = CDir->direction * CVel->max_speed;
 }
