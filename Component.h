@@ -5,6 +5,7 @@
 #include <tuple>
 #include <functional>
 #include <optional>
+#include <cassert>
 
 #include "Math.h"
 
@@ -191,6 +192,13 @@ struct Registry {
 
         auto Idx = FindIt->second;
         return &getCmp<T>()[Idx].second;
+    }
+
+    template<typename T>
+    T* findComponent(EntityId Ent) {
+        auto* Ptr = findComponentOrNull<T>(Ent);
+        assert(Ptr && "Accessing not register component");
+        return Ptr;
     }
 
     EntityId getPlayer() {
