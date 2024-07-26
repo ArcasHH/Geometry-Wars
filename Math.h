@@ -4,6 +4,7 @@
 #include <cmath>
 #include "Constants.h"
 
+using BuffTy = decltype(buffer);
 
 
 template< typename T >
@@ -114,6 +115,20 @@ struct Triangle {
     Triangle(vec2<float> v1, vec2<float> v2, vec2<float> v3) : v1{ v1 }, v2{ v2 }, v3{ v3 } {}
     void rotate(float phi);
 };
+
+struct Rectangle {
+    vec2<int> lt, rb;
+    Rectangle(int ltx, int lty, int rbx, int rby) : lt{ ltx,lty }, rb{ rbx, rby } {}
+    Rectangle(vec2<int> lt, vec2<int> rb) : lt{ lt }, rb{ rb } {}
+    void draw(BuffTy buffer) {
+        for (int j = lt.y; j != rb.y; ++j) {
+            for (int i = lt.x; i != rb.x; ++i) {
+                buffer[j][i] = 0xffffffff;
+            }
+        }
+    }
+};
+
 
 float angle_between(const vec2<float>& a, const vec2<float>& b);
 vec2<int> get_min_max(float a, float b, float c);

@@ -412,8 +412,8 @@ void sys::drawScore(BuffTy Buffer) {
     auto Player = Reg.getPlayer();
     auto Score = Reg.findComponent<cmp::IsPlayer>(Player)->curr_score;
 
-    static int PosX = 100;
-    static int PosY = 100;
+    static int PosX = SCREEN_WIDTH - 50;
+    static int PosY = 50;
 
     static constexpr int LWidth = 2;
     static constexpr int LHeight = 10;
@@ -422,7 +422,7 @@ void sys::drawScore(BuffTy Buffer) {
     static constexpr int PlateHeigh = 24;
     static constexpr uint64_t Color = 0xffffffff;
 
-    static constexpr int xOffset = PlateWidth + 2;
+    static constexpr int xOffset = PlateWidth + 6;
     int currOff = 0;
     do {
 
@@ -505,7 +505,7 @@ void sys::drawScore(BuffTy Buffer) {
         }
 
         Score /= 10;
-        currOff += xOffset;
+        currOff -= xOffset;
     } while (Score > 0);
 
 }
