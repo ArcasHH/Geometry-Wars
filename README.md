@@ -12,6 +12,7 @@ Requirements:
 - C++17
 
 - Use `GameTemplate.sln` to configure and MSVS to build and run project.
+- `GeometryWars.exe` will be built.
 
 TODO: Removing Components and Entities are not implemented. But Entities can be marked with `IsActive` component. This approach eliminates any memory allocation in the main loop.
 
