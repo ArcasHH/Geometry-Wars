@@ -412,96 +412,74 @@ void sys::drawScore(BuffTy Buffer) {
     auto Player = Reg.getPlayer();
     auto Score = Reg.findComponent<cmp::IsPlayer>(Player)->curr_score;
 
-    static int PosX = SCREEN_WIDTH - 50;
-    static int PosY = 50;
+    
+    static constexpr int LWidth =  SCALE_SCORE;
+    static constexpr int LHeight = 5 * SCALE_SCORE;
 
-    static constexpr int LWidth = 2;
-    static constexpr int LHeight = 10;
-
-    static constexpr int PlateWidth = 12;
-    static constexpr int PlateHeigh = 24;
-    static constexpr uint64_t Color = 0xffffffff;
-
-    static constexpr int xOffset = PlateWidth + 6;
+    static constexpr int PlateWidth = 6 * SCALE_SCORE;
+    static constexpr int PlateHeigh = 12 * SCALE_SCORE;
+    static constexpr int PosX = SCREEN_WIDTH -20 - PlateWidth - LWidth*2;
+    static constexpr int PosY = 20+ LHeight + LWidth * 2;
+    static constexpr int xOffset = PlateWidth + LWidth*3;
     int currOff = 0;
     do {
 
-        if (currOff + PosX + PlateWidth > SCREEN_WIDTH)
+        if (currOff + PosX + PlateWidth > SCREEN_WIDTH ||  PosY + PlateHeigh > SCREEN_HEIGHT)
             return;
 
         auto Digit = Score % 10;
 
         auto Bits = getBits(Digit);
-
+        Rectangle r;
         if (Bits[0]) {
+            
             auto LTX = PosX - PlateWidth / 2 + currOff;
             auto LTY = PosY - PlateHeigh / 2;
+             r = Rectangle(LTX, LTY, LTX + LWidth, LTY + LHeight + LWidth * 2);
+            r.draw(buffer);
 
-            for (int j = LTY; j != LTY + LHeight; ++j) {
-                for (int i = LTX; i != LTX + LWidth; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
         }
         if (Bits[1]) {
             auto LTX = PosX - PlateWidth / 2 + currOff;
             auto LTY = PosY;
 
-            for (int j = LTY; j != LTY + LHeight; ++j) {
-                for (int i = LTX; i != LTX + LWidth; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LWidth, LTY + LHeight + LWidth * 2);
+            r.draw(buffer);
         }
         if (Bits[2]) {
             auto LTX = PosX + PlateWidth / 2 + currOff;
             auto LTY = PosY - PlateHeigh / 2;
 
-            for (int j = LTY; j != LTY + LHeight; ++j) {
-                for (int i = LTX; i != LTX + LWidth; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LWidth, LTY + LHeight + LWidth * 2);
+            r.draw(buffer);
         }
         if (Bits[3]) {
             auto LTX = PosX + PlateWidth / 2 + currOff;
             auto LTY = PosY;
 
-            for (int j = LTY; j != LTY + LHeight; ++j) {
-                for (int i = LTX; i != LTX + LWidth; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LWidth, LTY + LHeight + LWidth * 2);
+            r.draw(buffer);
         }
         if (Bits[4]) {
             auto LTX = PosX - PlateWidth / 2 + currOff;
             auto LTY = PosY - PlateHeigh / 2;
-
-            for (int j = LTY; j != LTY + LWidth; ++j) {
-                for (int i = LTX; i != LTX + LHeight; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LHeight + LWidth*2, LTY + LWidth);
+            r.draw(buffer);
+ 
         }
         if (Bits[5]) {
             auto LTX = PosX - PlateWidth / 2 + currOff;
             auto LTY = PosY;
 
-            for (int j = LTY; j != LTY + LWidth; ++j) {
-                for (int i = LTX; i != LTX + LHeight; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LHeight + LWidth*2, LTY + LWidth);
+            r.draw(buffer);
         }
         if (Bits[6]) {
             auto LTX = PosX - PlateWidth / 2 + currOff;
             auto LTY = PosY + PlateHeigh / 2;
 
-            for (int j = LTY; j != LTY + LWidth; ++j) {
-                for (int i = LTX; i != LTX + LHeight; ++i) {
-                    buffer[j][i] = Color;
-                }
-            }
+            r = Rectangle(LTX, LTY, LTX + LHeight + LWidth*2, LTY + LWidth);
+            r.draw(buffer);
         }
 
         Score /= 10;

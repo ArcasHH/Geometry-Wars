@@ -118,6 +118,7 @@ struct Triangle {
 
 struct Rectangle {
     vec2<int> lt, rb;
+    Rectangle() = default;
     Rectangle(int ltx, int lty, int rbx, int rby) : lt{ ltx,lty }, rb{ rbx, rby } {}
     Rectangle(vec2<int> lt, vec2<int> rb) : lt{ lt }, rb{ rb } {}
     void draw(BuffTy buffer) {

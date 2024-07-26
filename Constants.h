@@ -6,7 +6,7 @@ constexpr  float  SPEED_FADE = 0.999f; // 1 - does not fade ( x-axis ), 0 - ther
 constexpr float FLOAT_PRECISE = 1e-5f;
 static_assert(SPEED_FADE < 1.f && SPEED_FADE > 0.f);
 //constexpr float GAME_SPEED = 300.f;
-
+constexpr int SCALE_SCORE = 4;
 //Player parametrs
 constexpr  float  MAX_SPEED = 3000.f;//player speed limit
 constexpr  float  SPEED_SCALE = 400.f;//the coefficient of speed change when control(). // must not exceed the value of MAX_SPEED * 1/dt
