@@ -1,4 +1,4 @@
-# Game Template (Windows)
+# Game Template (Windows) GeometryWars
 
 A simple framework for prototyping games. \
 The framework provides a video buffer and simple keyboard and mouse input.
