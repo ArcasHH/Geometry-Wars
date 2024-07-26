@@ -1,5 +1,6 @@
 #include "System.h"
 
+#include <bitset>
 
 //act(dt)
 void sys::act(float dt) { 
@@ -376,5 +377,136 @@ void sys::draw(BuffTy Buffer) {
             }
         }
     }
+}
+
+std::bitset<7> getBits(char Digit) {
+    switch (Digit)
+    {
+    case 0:
+        return 0b1011111;
+    case 1:
+        return 0b0001100;
+    case 2:
+        return 0b1110110;
+    case 3:
+        return 0b1111100;
+    case 4:
+        return 0b0101101;
+    case 5:
+        return 0b1111001;
+    case 6:
+        return 0b1111011;
+    case 7:
+        return 0b0011100;
+    case 8:
+        return 0b1111111;
+    case 9:
+        return 0b1111101;
+    default:
+        throw std::runtime_error{ "unexpected digit" };
+    }
+}
+
+void sys::drawScore(BuffTy Buffer) {
+
+    auto Player = Reg.getPlayer();
+    auto Score = Reg.findComponent<cmp::IsPlayer>(Player)->curr_score;
+
+    static int PosX = 100;
+    static int PosY = 100;
+
+    static constexpr int LWidth = 2;
+    static constexpr int LHeight = 10;
+
+    static constexpr int PlateWidth = 12;
+    static constexpr int PlateHeigh = 24;
+    static constexpr uint64_t Color = 0xffffffff;
+
+    static constexpr int xOffset = PlateWidth + 2;
+    int currOff = 0;
+    do {
+
+        if (currOff + PosX + PlateWidth > SCREEN_WIDTH)
+            return;
+
+        auto Digit = Score % 10;
+
+        auto Bits = getBits(Digit);
+
+        if (Bits[0]) {
+            auto LTX = PosX - PlateWidth / 2 + currOff;
+            auto LTY = PosY - PlateHeigh / 2;
+
+            for (int j = LTY; j != LTY + LHeight; ++j) {
+                for (int i = LTX; i != LTX + LWidth; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[1]) {
+            auto LTX = PosX - PlateWidth / 2 + currOff;
+            auto LTY = PosY;
+
+            for (int j = LTY; j != LTY + LHeight; ++j) {
+                for (int i = LTX; i != LTX + LWidth; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[2]) {
+            auto LTX = PosX + PlateWidth / 2 + currOff;
+            auto LTY = PosY - PlateHeigh / 2;
+
+            for (int j = LTY; j != LTY + LHeight; ++j) {
+                for (int i = LTX; i != LTX + LWidth; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[3]) {
+            auto LTX = PosX + PlateWidth / 2 + currOff;
+            auto LTY = PosY;
+
+            for (int j = LTY; j != LTY + LHeight; ++j) {
+                for (int i = LTX; i != LTX + LWidth; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[4]) {
+            auto LTX = PosX - PlateWidth / 2 + currOff;
+            auto LTY = PosY - PlateHeigh / 2;
+
+            for (int j = LTY; j != LTY + LWidth; ++j) {
+                for (int i = LTX; i != LTX + LHeight; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[5]) {
+            auto LTX = PosX - PlateWidth / 2 + currOff;
+            auto LTY = PosY;
+
+            for (int j = LTY; j != LTY + LWidth; ++j) {
+                for (int i = LTX; i != LTX + LHeight; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+        if (Bits[6]) {
+            auto LTX = PosX - PlateWidth / 2 + currOff;
+            auto LTY = PosY + PlateHeigh / 2;
+
+            for (int j = LTY; j != LTY + LWidth; ++j) {
+                for (int i = LTX; i != LTX + LHeight; ++i) {
+                    buffer[j][i] = Color;
+                }
+            }
+        }
+
+        Score /= 10;
+        currOff += xOffset;
+    } while (Score > 0);
+
 }
 
