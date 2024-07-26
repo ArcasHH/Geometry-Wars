@@ -29,9 +29,9 @@ namespace cmp {
         Color(unsigned char R, unsigned char G, unsigned char B, unsigned char A = 255) : r{ R }, g{ G }, b{ B }, a{ A } { }
         Color& operator=(const Color&) = default;
         Color& operator+=(const Color& other) {
-            b = (b + other.b) % 255;
-            g = (g + other.g) % 255;
-            r = (r + other.r) % 255;
+            b += other.b;
+            g += other.g;
+            r += other.r;
             return *this;
         }
     };
@@ -127,13 +127,11 @@ struct Registry {
         operator size_t() const { return Val;  }
     };
 
-    
-
     template <typename T>
     using ComponentStorage = std::vector<std::pair<EntityId, T>>;
 
     template <typename T>
-    using ComponentMap = std::unordered_map< EntityId, IdxWrapper<T>>; // this std::any is a pointer to specific iterator;
+    using ComponentMap = std::unordered_map< EntityId, IdxWrapper<T>>;
 
     using AllComponentMap = std::tuple<ComponentMap<Components>...>;
     AllComponentMap Map;
@@ -149,7 +147,7 @@ struct Registry {
     std::vector<EntityId> EntityStorage;
 
     static EntityId getId() {
-        static std::atomic<EntityId> Id = 0;
+        static EntityId Id = 0;
         return Id++;
     }
 
@@ -189,7 +187,7 @@ struct Registry {
     template<typename T>
     T* findComponentOrNull(EntityId Ent) {
         auto& CmpMap = getMap<T>();
-        auto FindIt = CmpMap.find(Ent); // HERE!!!!!!!
+        auto FindIt = CmpMap.find(Ent);
         if (FindIt == CmpMap.end())
             return nullptr;
 
