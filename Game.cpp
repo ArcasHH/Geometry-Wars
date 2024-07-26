@@ -168,7 +168,6 @@ void draw()
   memset(buffer, 0, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
 
   sys::draw(buffer);
-  sys::drawScore(buffer);
 }
 
 // free game data in this function

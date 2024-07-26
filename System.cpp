@@ -52,7 +52,7 @@ void sys::rotate() {
 void sys::outOfBounds() {
     auto& View = Reg.view<cmp::Position>();
     for (auto&& [Ent, Pos] : View) {
-        bool is_out = false;
+        bool IsOut = false;
 
         auto CActive = Reg.findComponent<cmp::IsActive>(Ent);
         if (!CActive->is_active)
@@ -62,40 +62,40 @@ void sys::outOfBounds() {
         if (Pos.position.x < BOUND_WIDTH) {
             CVel->velocity.x = 0;
             Pos.position.x = BOUND_WIDTH;
-            is_out = true;
+            IsOut = true;
         }
         if (Pos.position.y < BOUND_WIDTH) {
             CVel->velocity.y = 0;
             Pos.position.y = BOUND_WIDTH;
-            is_out = true;
+            IsOut = true;
         }
         if (Pos.position.x > SCREEN_WIDTH - BOUND_WIDTH) {
             CVel->velocity.x = 0;
             Pos.position.x = SCREEN_WIDTH - BOUND_WIDTH;
-            is_out = true;
+            IsOut = true;
         }
         if (Pos.position.y > SCREEN_HEIGHT - BOUND_WIDTH) {
             CVel->velocity.y = 0;
             Pos.position.y = SCREEN_HEIGHT - BOUND_WIDTH;
-            is_out = true;
+            IsOut = true;
         }
         //if the bullet has reached the border, then it returns to the ammo storage
         auto CBullet = Reg.findComponentOrNull<cmp::IsBullet>(Ent);
-        if (CBullet && is_out) { // until the bullet goes beyond the border, it cannot be used
+        if (CBullet && IsOut) { // until the bullet goes beyond the border, it cannot be used
             CActive->is_active = false;
         }
     }
 }
-void sys::turnTowards(EntityId ent_id, vec2<float> pos) {
-    auto CRot = Reg.findComponent<cmp::Rotation>(ent_id);
-    auto CPos = Reg.findComponent<cmp::Position>(ent_id);
-    auto CDir = Reg.findComponent<cmp::Direction>(ent_id);
-    CRot->phi = angle_between(CDir->direction, pos - CPos->position);
+void sys::turnTowards(EntityId EntId, vec2<float> Pos) {
+    auto CRot = Reg.findComponent<cmp::Rotation>(EntId);
+    auto CPos = Reg.findComponent<cmp::Position>(EntId);
+    auto CDir = Reg.findComponent<cmp::Direction>(EntId);
+    CRot->phi = angle_between(CDir->direction, Pos - CPos->position);
     rotateVector(CRot->phi, CDir->direction);
 }
-void sys::moveInDir(EntityId ent_id, float dt) {
-    auto CDir = Reg.findComponent<cmp::Direction>(ent_id);
-    auto CVel = Reg.findComponent<cmp::Velocity>(ent_id);
+void sys::moveInDir(EntityId EntId, float dt) {
+    auto CDir = Reg.findComponent<cmp::Direction>(EntId);
+    auto CVel = Reg.findComponent<cmp::Velocity>(EntId);
     if ((CVel->velocity).length() > CVel->max_speed)
         return;
     if (CVel->speed_scale > 0)
@@ -103,19 +103,19 @@ void sys::moveInDir(EntityId ent_id, float dt) {
     else
         CVel->velocity = CDir->direction * CVel->max_speed;
 }
-bool sys::isEntitiesCollide(EntityId ent1_id, EntityId ent2_id) {
-    auto CActive1 = Reg.findComponent<cmp::IsActive>(ent1_id);
-    auto CActive2 = Reg.findComponent<cmp::IsActive>(ent2_id);
+bool sys::isEntitiesCollide(EntityId EntId1, EntityId EntId2) {
+    auto CActive1 = Reg.findComponent<cmp::IsActive>(EntId1);
+    auto CActive2 = Reg.findComponent<cmp::IsActive>(EntId2);
 
     if (!(CActive1->is_active) || !(CActive2->is_active))
         return false;
-    auto CPos1 = Reg.findComponent<cmp::Position>(ent1_id);
-    auto CColl1 = Reg.findComponent<cmp::Collision>(ent1_id);
-    auto CPos2 = Reg.findComponent<cmp::Position>(ent2_id);
-    auto CColl2 = Reg.findComponent<cmp::Collision>(ent2_id);
+    auto CPos1 = Reg.findComponent<cmp::Position>(EntId1);
+    auto CColl1 = Reg.findComponent<cmp::Collision>(EntId1);
+    auto CPos2 = Reg.findComponent<cmp::Position>(EntId2);
+    auto CColl2 = Reg.findComponent<cmp::Collision>(EntId2);
 
-    float dist = CColl1->collide_distance + CColl2->collide_distance;
-    return (CPos1->position - CPos2->position).sq_length() < dist * dist;
+    float Dist = CColl1->collide_distance + CColl2->collide_distance;
+    return (CPos1->position - CPos2->position).sq_length() < Dist * Dist;
 }
 
 //Player act system
@@ -128,27 +128,25 @@ void sys::control(float dt) {
     auto PlayerEnt = Reg.getPlayer();
     auto CVel = Reg.findComponent<cmp::Velocity>(PlayerEnt);
 
-    float scale = SPEED_SCALE * dt;
+    float Scale = SPEED_SCALE * dt;
     if (is_key_pressed('D')) {
         if (CVel->velocity.x <= MAX_SPEED)
-            CVel->velocity.x += scale;
+            CVel->velocity.x += Scale;
     }
     if (is_key_pressed('A')) {
         if (CVel->velocity.x >= -MAX_SPEED)
-            CVel->velocity.x -= scale;
+            CVel->velocity.x -= Scale;
     }
     if (is_key_pressed('S')) {
         if (CVel->velocity.y <= MAX_SPEED)
-            CVel->velocity.y += scale;
+            CVel->velocity.y += Scale;
     }
     if (is_key_pressed('W')) {
         if (CVel->velocity.y >= -MAX_SPEED)
-            CVel->velocity.y -= scale;
+            CVel->velocity.y -= Scale;
     }
     if (is_mouse_button_pressed(0)) {
         auto CShoot = Reg.findComponent<cmp::CanShoot>(PlayerEnt);
-        if (!CShoot)
-            return;
         if (CShoot->can_shoot) {
             sys::shoot(dt);
             CShoot->reload_timer = AMMO_RELOAD;
@@ -185,8 +183,7 @@ void sys::ammoReload(float dt) {
     auto CShoot = Reg.findComponent<cmp::CanShoot>(PlayerEnt);
     if (CShoot->reload_timer < FLOAT_PRECISE) {
         CShoot->can_shoot = true;
-    }
-    else {
+    } else {
         CShoot->reload_timer -= dt;
     }
 }
@@ -208,10 +205,10 @@ void sys::bulletCollideEnemy() {
     auto CAmmo = Reg.findComponent<cmp::Ammo>(PlayerEnt);
     for (int i = 0; i < AMMO_AMOUNT; ++i) {
         EntityId BulletEnt = CAmmo->ammo_store[i];
-
+        auto CActive = Reg.findComponent<cmp::IsActive>(BulletEnt);
         auto& View = Reg.view<cmp::IsEnemy>();
         for (auto&& [EnemyEnt, _] : View) {
-            auto CActive = Reg.findComponent<cmp::IsActive>(BulletEnt);
+        
             if(!isEntitiesCollide(BulletEnt, EnemyEnt))
                 continue;
             CActive->is_active = false;
@@ -225,17 +222,15 @@ void sys::checkPlayerEnemyCollide() {
     auto PlayerEnt = Reg.getPlayer();
     auto CPlayerPos = Reg.findComponent<cmp::Position>(PlayerEnt);
     auto CPlayerColl = Reg.findComponent<cmp::Collision>(PlayerEnt);
-    if (!CPlayerPos || !CPlayerColl)
-        return;
     auto& View = Reg.view<cmp::IsEnemy>();
     for (auto&& [EnemyEnt, EnemyCost] : View) {
         auto CEnemyPos = Reg.findComponent<cmp::Position>(EnemyEnt);
         auto CEnemyColl = Reg.findComponent<cmp::Collision>(EnemyEnt);
         auto CEnemyActive = Reg.findComponent<cmp::IsActive>(EnemyEnt);
-        if (!CEnemyPos || !CEnemyColl || !CEnemyActive->is_active)
+        if (!CEnemyActive->is_active)
             continue;
-        float dist = CPlayerColl->collide_distance + CEnemyColl->collide_distance;
-        if ((CPlayerPos->position - CEnemyPos->position).sq_length() > dist * dist)
+        float Dist = CPlayerColl->collide_distance + CEnemyColl->collide_distance;
+        if ((CPlayerPos->position - CEnemyPos->position).sq_length() > Dist * Dist)
             continue;
         PlayerEnemyCollide(EnemyEnt);
     }
@@ -245,10 +240,10 @@ void sys::PlayerEnemyCollide(EntityId& enemy_id) {
     pushEnemy(CEnemyVel->velocity);
     getDamage(Reg.getPlayer(), enemy_id);
 }
-void sys::pushEnemy(vec2<float>& enemy_speed) {
-    enemy_speed *= (-PUSH_ENEMIES);
-    if (enemy_speed.length() > 10 * ENEMY_MAX_SPEED)
-        enemy_speed = enemy_speed.normalized() * 10 * ENEMY_MAX_SPEED;
+void sys::pushEnemy(vec2<float>& EnemySpeed) {
+    EnemySpeed *= (-PUSH_ENEMIES);
+    if (EnemySpeed.length() > 10 * ENEMY_MAX_SPEED)
+        EnemySpeed = EnemySpeed.normalized() * 10 * ENEMY_MAX_SPEED;
 }
 void sys::killEnemy(EntityId enemy_id) {
     auto PlayerEnt = Reg.getPlayer();
@@ -264,7 +259,9 @@ void sys::updateHealth(float dt) {
     diaplayPlayerHealth();
 }
 void sys::checkHealth() {
+    auto PlayerEnt = Reg.getPlayer();
     auto& View = Reg.view<cmp::Health>();
+   
     for (auto&& [Ent, CHealth] : View) {
         auto CActive = Reg.findComponent<cmp::IsActive>(Ent);
         if (!CActive->is_active || CHealth.curr_health > 0)
@@ -294,17 +291,15 @@ void sys::diaplayPlayerHealth() {
     auto PlayerEnt = Reg.getPlayer();
     auto CPlayerHealth = Reg.findComponent<cmp::Health>(PlayerEnt);
     auto CPlayerColor = Reg.findComponent<cmp::Color>(PlayerEnt);
-    if ((CPlayerHealth->curr_health >= CPlayerHealth->max_health) || !CPlayerColor)
+    if (CPlayerHealth->curr_health >= CPlayerHealth->max_health)
         return;
     unsigned char red = static_cast<unsigned char>(255 - 255 * CPlayerHealth->curr_health / CPlayerHealth->max_health);
     CPlayerColor->r = red;
     CPlayerColor->g = 255 - red;
 }
-void sys::getDamage(EntityId ent_id, EntityId damager_id) {
-    auto CHealth = Reg.findComponent<cmp::Health>(ent_id);
+void sys::getDamage(EntityId EntId, EntityId damager_id) {
+    auto CHealth = Reg.findComponent<cmp::Health>(EntId);
     auto CDamage = Reg.findComponent<cmp::Damage>(damager_id);
-    if (!CDamage || !CHealth)
-        return;
     CHealth->curr_health -= CDamage->damage;
 }
 
@@ -336,12 +331,11 @@ void sys::updateScenario(float dt) {
 }
 void sys::ActivatelEnemy(EntityId enemy_id) {
     auto CEnemyActive = Reg.findComponent<cmp::IsActive>(enemy_id);
-    auto CEnemyHealth = Reg.findComponent<cmp::Health>(enemy_id);
-    auto CEnemyPos = Reg.findComponent<cmp::Position>(enemy_id);
-
     if (CEnemyActive->is_active)
         return;
 
+    auto CEnemyHealth = Reg.findComponent<cmp::Health>(enemy_id);
+    auto CEnemyPos = Reg.findComponent<cmp::Position>(enemy_id);
     CEnemyActive->is_active = true;
     CEnemyHealth->curr_health = CEnemyHealth->max_health;
     float x_pos = random(BOUND_WIDTH, BOUND_WIDTH + 50);
@@ -350,36 +344,7 @@ void sys::ActivatelEnemy(EntityId enemy_id) {
     turnTowards(enemy_id, CEnemyPos->position + vec2<float>(0.f, 1.f));
 }
 
-//draw(buffer)
-void sys::draw(BuffTy Buffer) {
-
-    auto& View = Reg.view<cmp::TriangleSprite>();
-
-    for (auto&& [Ent, Tr] : View) {
-        auto CColor = Reg.findComponent<cmp::Color>(Ent);
-        auto CPos = Reg.findComponent<cmp::Position>(Ent);
-        auto CActive = Reg.findComponent<cmp::IsActive>(Ent);
-
-        if (!CActive->is_active)
-            continue;
-
-        vec2<int> p(static_cast<int>(CPos->position.x), static_cast<int>(CPos->position.y));
-        vec2<int> x = get_min_max(Tr.sprite.v1.x, Tr.sprite.v2.x, Tr.sprite.v3.x) + vec2<int>(p.x, p.x); // x = (x_min, x_max)
-        vec2<int> y = get_min_max(Tr.sprite.v1.y, Tr.sprite.v2.y, Tr.sprite.v3.y) + vec2<int>(p.y, p.y); // y = (y_min, y_max)
-
-        for (int j = y.x; j <= y.y; ++j) {
-            for (int i = x.x; i <= x.y; ++i) {
-                if (point_in_triangle(vec2<int>(i, j) - p, Tr.sprite.v1 , Tr.sprite.v2 , Tr.sprite.v3 )) {
-                    if (i<0 || i >= SCREEN_WIDTH || j < 0 || j >= SCREEN_HEIGHT)
-                        continue;//out of bounds
-                    buffer[j][i] = CColor->data;
-                }
-            }
-        }
-    }
-}
-
-std::bitset<7> getBits(char Digit) {
+static std::bitset<7> getBits(char Digit) {
     switch (Digit)
     {
     case 0:
@@ -407,7 +372,7 @@ std::bitset<7> getBits(char Digit) {
     }
 }
 
-void sys::drawScore(BuffTy Buffer) {
+static void drawScore(BuffTy Buffer) {
 
     auto Player = Reg.getPlayer();
     auto Score = Reg.findComponent<cmp::IsPlayer>(Player)->curr_score;
@@ -488,3 +453,33 @@ void sys::drawScore(BuffTy Buffer) {
 
 }
 
+//draw(buffer)
+void sys::draw(BuffTy Buffer) {
+
+    auto& View = Reg.view<cmp::TriangleSprite>();
+
+    for (auto&& [Ent, Tr] : View) {
+        auto CColor = Reg.findComponent<cmp::Color>(Ent);
+        auto CPos = Reg.findComponent<cmp::Position>(Ent);
+        auto CActive = Reg.findComponent<cmp::IsActive>(Ent);
+
+        if (!CActive->is_active)
+            continue;
+
+        vec2<int> p(static_cast<int>(CPos->position.x), static_cast<int>(CPos->position.y));
+        vec2<int> x = get_min_max(Tr.sprite.v1.x, Tr.sprite.v2.x, Tr.sprite.v3.x) + vec2<int>(p.x, p.x); // x = (x_min, x_max)
+        vec2<int> y = get_min_max(Tr.sprite.v1.y, Tr.sprite.v2.y, Tr.sprite.v3.y) + vec2<int>(p.y, p.y); // y = (y_min, y_max)
+
+        for (int j = y.x; j <= y.y; ++j) {
+            for (int i = x.x; i <= x.y; ++i) {
+                if (point_in_triangle(vec2<int>(i, j) - p, Tr.sprite.v1, Tr.sprite.v2, Tr.sprite.v3)) {
+                    if (i < 0 || i >= SCREEN_WIDTH || j < 0 || j >= SCREEN_HEIGHT)
+                        continue;//out of bounds
+                    buffer[j][i] = CColor->data;
+                }
+            }
+        }
+    }
+
+    drawScore(Buffer);
+}

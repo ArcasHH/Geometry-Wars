@@ -22,7 +22,6 @@ namespace sys {
     void turnTowards(EntityId ent_id, vec2<float> pos);
     void moveInDir(EntityId ent_id, float dt);
     bool isEntitiesCollide(EntityId ent1_id, EntityId ent2_id);
-    void drawScore(BuffTy Buffer);
     
     //player act
     void playerControl(float dt);
